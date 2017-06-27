@@ -1,0 +1,63 @@
+@mixin aspect-ratio($width, $height) {
+  position: relative;
+  &:before {
+    display: block;
+    content: "";
+    width: 100%;
+    padding-top: ($height / $width) * 100%;
+  }
+  > .content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+}
+
+@mixin bp($point) {
+  
+  $bp-mobile: "(max-width: 480px)";
+  $bp-sml: "(min-width: 481px)";
+  $bp-med: "(min-width: 768px)";
+  $bp-lrg: "(min-width: 980px)";
+  $bp-x-lrg: "(min-width: 1200px)";
+  $bp-huge: "(min-width: 1500px)";
+
+  @if $point == huge {
+    @media only screen and #{$bp-huge} { @content; }
+  }
+  @else if $point == lrg {
+    @media only screen and #{$bp-lrg} { @content; }
+  }
+  @else if $point == med {
+    @media only screen and #{$bp-med} { @content; }
+  }
+  @else if $point == sml {
+    @media only screen and #{$bp-sml}  { @content; }
+  }
+  @else if $point == mobile {
+    @media only screen and #{$bp-mobile}  { @content; }
+  }
+
+}
+
+
+@mixin palette($colour) {
+
+  @if $colour == steel {
+    color: #2c3e50;
+  }
+
+  @else if $colour == appblue {
+
+  }
+
+  @else if $colour == appred {
+    color: #851010;
+  }
+
+  @else if $colour == midgrey {
+    color: #575c63
+  }
+}

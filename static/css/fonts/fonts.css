@@ -1,0 +1,35 @@
+@font-face {
+    font-family: 'gothamsl-bold';
+    src: url('gothamsl-bold-webfont.woff2') format('woff2'),
+         url('gothamsl-bold-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'gothamsl-book';
+    src: url('gothamsl-book-webfont.woff2') format('woff2'),
+         url('gothamsl-book-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'gothamsl-light';
+    src: url('gothamsl-light-webfont.woff2') format('woff2'),
+         url('gothamsl-light-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+@font-face {
+    font-family: 'gothamsl-medium';
+    src: url('gothamsl-medium-webfont.woff2') format('woff2'),
+         url('gothamsl-medium-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
