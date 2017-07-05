@@ -1,13 +1,17 @@
 <template>
-  <div id="projects-outer-container">
-  <transition name="fade" appear mode="out-in">
+  <div id="contents-outer-container">
+  <transition 
+    name="stage-right" 
+    appear mode="out-in"
+    v-on:after-enter="afterEnter"
+    v-on:before-leave="beforeLeave">
     <router-view></router-view>
   </transition>
-      <!--  <h1>Layout size is {{ layoutSize }}</h1>
+      <!-- <h1>Layout size is {{ layoutSize }}</h1>
        <h1>Viewportwidth is {{ viewportWidth }}</h1>
        <h1>Screen Density is {{ screenDensity }}</h1>
        <h1>Image res is {{ imageRes }}</h1> -->
-       <div id="projects-inner-container" v-if="contentLoaded">
+       <div id="projects-thumbs-container" v-if="contentLoaded">
        <transition name="fade" appear mode="out-in">
          <section id="project-thumbs-lrg" v-if="layoutSize=='lrg' && imagesLoaded">
             <project-thumb 
@@ -15,8 +19,10 @@
              :project="project" 
              :key="index" 
              :index="index" 
-             :width="gridLayoutLrg[index]"
-             :res="imageRes">
+             :myWidth="gridLayoutLrg[index]"
+             :myHeight="thumbHeight"
+             :res="imageRes"
+             :gridInit="gridInit">
             </project-thumb>
          </section>
         </transition>
@@ -27,8 +33,10 @@
              :project="project" 
              :key="index" 
              :index="index" 
-             :width="index % 3 == 0 ? 'wide' : 'narrow'"
-             :res="imageRes">
+             :myWidth="index % 3 == 0 ? 'wide' : 'narrow'"
+             :myHeight="thumbHeight"
+             :res="imageRes"
+             :gridInit="gridInit">
             </project-thumb>
          </section>
          </transition>
@@ -39,8 +47,10 @@
              :project="project" 
              :key="index" 
              :index="index" 
-             :width="'x-wide'"
-             :res="imageRes">
+             :myWidth="'x-wide'"
+             :myHeight="thumbHeight"
+             :res="imageRes"
+             :gridInit="gridInit">
             </project-thumb>
          </section>
          </transition>
@@ -67,7 +77,7 @@ export default {
     return {
     ready: false,
     grid: {},
-    gridInitialized: false,
+    gridInit: false,
     gridLayoutLrg : ['x-wide', 'wide',
                   'wide', 'x-wide',
                   'narrow', 'wide', 'narrow',
@@ -88,7 +98,8 @@ export default {
                   ],
     imagesLoaded: false,
     imageURLs: [],
-    loaded: 0
+    loaded: 0,
+    thumbHeight: null
     }
   },
   computed: {
@@ -193,30 +204,31 @@ export default {
       })
     },
     setThumbHeight() {
-      let cWidth = $('#projects-inner-container').innerWidth(),
+      let cWidth = $('#projects-thumbs-container').innerWidth(),
           wThumb = this.layoutSize == 'lrg' ? cWidth*(3/7) : cWidth,
           hThumb = this.layoutSize == 'lrg' ? wThumb*(9/16)-12 : wThumb*(1/2.32)-12;
-          console.log(hThumb);
+          //console.log(hThumb);
+          this.thumbHeight = hThumb;
           $('.item').height(hThumb);
           this.$nextTick(function() {
-            if ( !this.gridInitialized )
+            if ( !this.gridInit )
               this.initGrid();
             //preloadImages(imgURLs, function() { callBack });
             else console.log('already init grid');
           })
     },
     initGrid() {  
-      let elem = document.getElementById('projects-inner-container');
+      let elem = document.getElementById('projects-thumbs-container');
       this.grid = new Packery( elem, {
             itemSelector: '.item',
             gutter: 0,
             transitionDuration: 0,
             percentPosition: true
         });
-      this.gridInitialized = true;
+      this.gridInit = true;
     },
     updateGrid() {
-      this.grid.packery();
+      this.grid.layout();
     },
     resizeListener() {
       let that = this;
@@ -225,10 +237,19 @@ export default {
         that.setThumbHeight();
         that.updateGrid();
       });
+    },
+    afterEnter() {
+      console.log('projectView')
+      this.$store.dispatch('setProjectView', true);
+    },
+    beforeLeave() {
+      console.log('homeView')
+       this.$store.dispatch('setProjectView', false);
     }
   },
   created() {
     this.setVWidth();
+    this.setVHeight();
     this.resizeListener();
   },
   mounted() {
@@ -249,11 +270,11 @@ export default {
 <style lang="scss">
 @import '../../style/mixins.scss';
 
-#projects-outer-container {
+#contents-outer-container {
   width: 100%;
   display: block;
 
-  #projects-inner-container {
+  #projects-thumbs-container {
     width: 86%;
     margin: 0 auto;
     display: block;
@@ -268,12 +289,13 @@ export default {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  cursor: pointer;
   img {
     max-width: 100%;
     width: 100%;
     height: auto;
     overflow: hidden;
-    transition: opacity 0.5s ease;
+    transition: opacity 1s ease;
   }
 
 }

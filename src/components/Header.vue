@@ -1,5 +1,5 @@
 <template>
-  <div id="header-outer-wrapper">
+  <header class="header">
     <div id="header-inner-wrapper">
       <div id="logo"> 
        <img src="../assets/mode_logo_web.png">
@@ -11,7 +11,7 @@
         </ul>
       </div>
     </div>
-  </div>
+  </header>
 </template>
 
 <script>
@@ -22,11 +22,10 @@ export default {
 
 <style lang="scss" scoped>
 
-#header-outer-wrapper {
+.header {
   margin: 0;
   padding: 0;
   width: 100%;
-  display: block;
 
   #header-inner-wrapper {
     width: 86%;
@@ -46,14 +45,19 @@ export default {
   }
 
   #nav-wrapper {  
+    float: right;
     ul {
       list-style: none;
-      float: right;
       margin: 0;
-      padding: 0;
+      padding: 16px 6px 0 0;
     }
     li {
+      font-size: 1.2em;
       float: left;
+      margin-left: 20px;
+    }
+    li:first-child {
+      margin-left: 0;
     }
   }
 }

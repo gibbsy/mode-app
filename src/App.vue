@@ -1,6 +1,8 @@
 <template>
-  <div id="app">
+  <div id="app" :class="{'view-toggle': projectView}">
+  <transition name="fade" appear mode="out-in">
   <app-header></app-header>
+  </transition>
     <router-view></router-view>
   </div>
 </template>
@@ -15,9 +17,44 @@ export default {
   components: {
     appHeader: Header
   },
+  data() {
+    return {
+      ticking : false
+    }
+  },
+  methods: {
+    onScroll() {
+      this.$store.dispatch('onScrolled', $(window).scrollTop());
+      this.requestTick();    
+    },
+    requestTick() {
+      if (!this.ticking) {
+            var self = this;
+            window.requestAnimationFrame(function() {
+              self.updateScroll();   
+            });
+          }
+      this.ticking = true;
+    },
+    updateScroll() {
+      this.ticking = false;
+      let currentScrollY = this.$store.getters.scrollPos;
+    },
+    scrollInit() {
+      window.addEventListener('scroll', this.onScroll);
+    }
+  },
+  computed: {
+    projectView() {
+      return this.$store.getters.projectView;
+    }
+  },
   created() {
     this.$store.dispatch('loadData');
 
+  },
+  mounted() {
+    this.scrollInit();
   }
 }
 </script>
@@ -39,6 +76,14 @@ export default {
   margin: 0;
   padding: 0;
   background: #fff;
+}
+
+.header {
+  display: block;
+}
+
+.view-toggle .header, .view-toggle #contents-outer-container #projects-thumbs-container {
+  display: none;
 }
 
 .slide-fade-enter-active {
@@ -68,4 +113,5 @@ export default {
 /* .slide-fade-leave-active for <2.1.8 */ {
   opacity: 0;
 }
+
 </style>

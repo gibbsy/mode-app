@@ -31,7 +31,7 @@ const mutations = {
 
 const actions = {
     loadData({commit}) {
-         Vue.http.get('projects')
+         Vue.http.get('projects?per_page=30')
         .then(response => response.json())
         .then(data => {
             //any data transformations here

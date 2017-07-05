@@ -1,32 +1,52 @@
 const state = {
-    viewPortWidth : null
+    viewportWidth : null,
+    viewportHeight : null,
+    projectView: false
 };
 
 const mutations = {
     'SETVIEWPORTWIDTH' (state, width) {
-        state.viewPortWidth = width;
+        state.viewportWidth = width;
+    },
+    'SETVIEWPORTHEIGHT' (state, height) {
+        state.viewportHeight = height;
+    },
+    'PROJECT_VIEW_ACTIVE' (state, val) {
+        state.projectView = val
     }
 };
 
 const actions = {
     setVWidth({commit},width) {
         commit('SETVIEWPORTWIDTH', width);
+    },
+    setVHeight({commit},height) {
+        commit('SETVIEWPORTHEIGHT', height);
+    },
+    setProjectView({commit}, val) {
+        commit('PROJECT_VIEW_ACTIVE', val);
     }
 };
 
 const getters = {
     viewportWidth: state => {
-        return state.viewPortWidth;
+        return state.viewportWidth;
+    },
+    viewportHeight: state => {
+        return state.viewportHeight;
     },
     layoutSize: state => {
-        if ( state.viewPortWidth < 768 )
+        if ( state.viewportWidth < 768 )
             return 'sml';
-        else if ( state.viewPortWidth >= 768 && state.viewPortWidth < 980 )
+        else if ( state.viewportWidth >= 768 && state.viewportWidth < 980 )
             return 'med';
-        else if ( state.viewPortWidth >= 980 )
+        else if ( state.viewportWidth >= 980 )
             return 'lrg';
-        else if ( state.viewPortWidth == null )
+        else if ( state.viewportWidth == null )
             return 'layout size not set';
+    },
+    projectView: state => {
+        return state.projectView;
     }
 };
 

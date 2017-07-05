@@ -6,6 +6,9 @@ export const responsiveUtils = {
     viewportWidth() {
       return this.$store.getters.viewportWidth;
     },
+    viewportHeight() {
+      return this.$store.getters.viewportHeight;
+    },
     layoutSize() {
       return this.$store.getters.layoutSize;
     },
@@ -37,6 +40,9 @@ export const responsiveUtils = {
   methods: {
     setVWidth() {
       this.$store.dispatch('setVWidth', $(window).width() );
+    },
+    setVHeight() {
+      this.$store.dispatch('setVHeight', $(window).height() );
     }
   }
 }
