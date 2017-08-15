@@ -11,50 +11,51 @@
        <h1>Viewportwidth is {{ viewportWidth }}</h1>
        <h1>Screen Density is {{ screenDensity }}</h1>
        <h1>Image res is {{ imageRes }}</h1> -->
-       <div id="projects-thumbs-container" v-if="contentLoaded">
-       <transition name="fade" appear mode="out-in">
-         <section id="project-thumbs-lrg" v-if="layoutSize=='lrg' && imagesLoaded">
-            <project-thumb 
-             v-for="(project, index) in projects"
-             :project="project" 
-             :key="index" 
-             :index="index" 
-             :myWidth="gridLayoutLrg[index]"
-             :myHeight="thumbHeight"
-             :res="imageRes"
-             :gridInit="gridInit">
-            </project-thumb>
-         </section>
-        </transition>
-        <transition name="fade" appear mode="out-in">
-         <section id="project-thumbs-med" v-if="layoutSize=='med' && imagesLoaded">
-            <project-thumb 
-             v-for="(project, index) in projects"
-             :project="project" 
-             :key="index" 
-             :index="index" 
-             :myWidth="index % 3 == 0 ? 'wide' : 'narrow'"
-             :myHeight="thumbHeight"
-             :res="imageRes"
-             :gridInit="gridInit">
-            </project-thumb>
-         </section>
-         </transition>
-         <transition name="fade" appear mode="out-in">
-         <section id="project-thumbs-sml" v-if="layoutSize=='sml' && imagesLoaded">
-            <project-thumb 
-             v-for="(project, index) in projects"
-             :project="project" 
-             :key="index" 
-             :index="index" 
-             :myWidth="'x-wide'"
-             :myHeight="thumbHeight"
-             :res="imageRes"
-             :gridInit="gridInit">
-            </project-thumb>
-         </section>
-         </transition>
-      </div>
+ <preloader v-if="!dataLoaded || !imagesLoaded || gridRecalculating"></preloader>    
+ <div id="projects-thumbs-container">
+ <transition name="fade" appear mode="out-in">
+   <section id="project-thumbs-lrg" v-if="layoutSize=='lrg' && imagesLoaded">
+      <project-thumb 
+       v-for="(project, index) in projects"
+       :project="project" 
+       :key="index" 
+       :index="index" 
+       :myWidth="gridLayoutLrg[index]"
+       :myHeight="thumbHeight"
+       :res="imageRes"
+       :gridReady="gridReady">
+      </project-thumb>
+   </section>
+  </transition>
+  <transition name="fade" appear mode="out-in">
+   <section id="project-thumbs-med" v-if="layoutSize=='med' && imagesLoaded">
+      <project-thumb 
+       v-for="(project, index) in projects"
+       :project="project" 
+       :key="index" 
+       :index="index" 
+       :myWidth="index % 3 == 0 ? 'wide' : 'narrow'"
+       :myHeight="thumbHeight"
+       :res="imageRes"
+       :gridReady="gridReady">
+      </project-thumb>
+   </section>
+   </transition>
+   <transition name="fade" appear mode="out-in">
+   <section id="project-thumbs-sml" v-if="layoutSize=='sml' && imagesLoaded">
+      <project-thumb 
+       v-for="(project, index) in projects"
+       :project="project" 
+       :key="index" 
+       :index="index" 
+       :myWidth="'x-wide'"
+       :myHeight="thumbHeight"
+       :res="imageRes"
+       :gridReady="gridReady">
+      </project-thumb>
+   </section>
+   </transition>
+</div>
  <!--      <section>
         <p>{{projects}}</p> 
       </section> -->
@@ -66,18 +67,22 @@ import $ from 'jquery';
 import Packery from 'packery';
 import LazyLoad from 'vanilla-lazyload';
 import ProjectThumb from './ProjectThumb.vue';
+import Preloader from '../Shared/Preloader.vue';
 import { responsiveUtils } from '../Mixins/responsiveMixin';
 
 export default {
   mixins: [ responsiveUtils ],
   components: {
-    projectThumb: ProjectThumb
+    projectThumb: ProjectThumb,
+    preloader: Preloader
   },
   data() {
     return {
-    ready: false,
-    grid: {},
-    gridInit: false,
+    grid: false,
+    gridReady: false,
+    packeryInit: false,
+    gridRecalculating: false,
+    resizing: false,
     gridLayoutLrg : ['x-wide', 'wide',
                   'wide', 'x-wide',
                   'narrow', 'wide', 'narrow',
@@ -98,6 +103,11 @@ export default {
                   ],
     imagesLoaded: false,
     imageURLs: [],
+    imageCache: {
+      'lrg': false,
+      'med': false,
+      'sml': false
+    },
     loaded: 0,
     thumbHeight: null
     }
@@ -113,8 +123,11 @@ export default {
       if (this.projects) 
         return this.projects.length;
     },
-    contentLoaded() {
+    dataLoaded() {
       return this.$store.getters.isLoaded;
+    },
+    layoutReady() {
+      // new prop to show / hide grid on resize
     }
   },
   methods: {
@@ -191,7 +204,7 @@ export default {
     },
     checkProgress(url) {
       let l = this.imageURLs.length;
-      console.log('loaded ' + url );
+      //console.log('loaded ' + url );
       if (++this.loaded === l ) {
         this.triggerLayout();
       }
@@ -199,6 +212,8 @@ export default {
     triggerLayout() {
       let that = this;
       this.imagesLoaded = true;
+      this.imageCache[this.layoutSize] = true;
+      console.dir(this.imageCache);
       this.$nextTick(function() {
         that.setThumbHeight();
       })
@@ -211,13 +226,13 @@ export default {
           this.thumbHeight = hThumb;
           $('.item').height(hThumb);
           this.$nextTick(function() {
-            if ( !this.gridInit )
+            if ( !this.gridReady )
               this.initGrid();
-            //preloadImages(imgURLs, function() { callBack });
-            else console.log('already init grid');
+              else console.log('already init grid');
           })
     },
     initGrid() {  
+      if(!this.grid) {
       let elem = document.getElementById('projects-thumbs-container');
       this.grid = new Packery( elem, {
             itemSelector: '.item',
@@ -225,17 +240,52 @@ export default {
             transitionDuration: 0,
             percentPosition: true
         });
-      this.gridInit = true;
+    } else {
+      this.grid.reloadItems();
+    }
+
+      if (this.gridRecalculating == true) {
+        let that = this;
+        setTimeout(function() {   
+         that.gridRecalculating = false;
+         that.gridReady = true;
+         that.packeryInit = true;
+         that.updateGrid();
+        },1200);
+      } else {
+        this.gridReady = true;
+        this.packeryInit = true;
+      }
+     
     },
     updateGrid() {
+      // called after window resize
+      this.setVWidth();
+      this.setVHeight();
+      this.setThumbHeight();
       this.grid.layout();
     },
-    resizeListener() {
+    /*reloadGrid() {
+      // called after dom updates
+      this.grid.reloadItems();
+      this.gridReady = true;
+      //this.updateGrid();
       let that = this;
-      $( window ).resize(function() {
-        that.setVWidth();
-        that.setThumbHeight();
-        that.updateGrid();
+      let showGrid = setTimeout(function() {   
+       that.gridRecalculating = false;
+      },2000);
+    },*/
+    resizeListener() {
+      let that = this,
+          resizeTimer;
+      $( window ).resize(function(e) {
+        that.resizing = true;
+        resizeTimer = setTimeout(function() {
+              that.resizing = false;
+        }, 250);
+        if(!that.gridRecalculating && that.packeryInit) {  
+          that.updateGrid(); 
+        }
       });
     },
     afterEnter() {
@@ -245,6 +295,26 @@ export default {
     beforeLeave() {
       console.log('homeView')
        this.$store.dispatch('setProjectView', false);
+    },
+    resetGrid() {
+      /*this.grid.destroy();
+      this.grid = {};*/
+      this.gridReady = false;
+      this.imagesLoaded = false;
+      this.packeryInit = false;
+      this.setVWidth();
+      this.setVHeight();
+      this.checkImageCache();
+    },
+    checkImageCache() {
+      // see if required images are already cached if not commence loading
+      if (!this.imageCache[this.layoutSize]) {  
+        this.imageURLs = [];
+        this.loaded = 0;
+        this.buildImageURLs();
+      } else {
+        this.triggerLayout();
+      }
     }
   },
   created() {
@@ -261,6 +331,14 @@ export default {
         this.$nextTick(function() {
           this.buildImageURLs();
         });
+      }
+    },
+    layoutSize: function(val) {
+      if(this.packeryInit) {  
+        console.log('layout size is ' + val + '... watching');
+        // reset grid if the layout size changes
+        this.gridRecalculating = true;
+        this.resetGrid();
       }
     }
   }

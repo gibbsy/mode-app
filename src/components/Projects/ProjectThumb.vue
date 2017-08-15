@@ -15,7 +15,7 @@
 <script>
 import $ from 'jquery';
 export default {
-  props: ['project', 'myWidth', 'myHeight', 'index', 'res', 'gridInit'],
+  props: ['project', 'myWidth', 'myHeight', 'index', 'res', 'gridReady'],
   data() {
     return {
       reveal : false,
@@ -87,7 +87,7 @@ export default {
     }
   },
   watch: {
-    gridInit: function(val) {
+    gridReady: function(val) {
       if(val) {
         this.getElCoords();
         this.checkInView();
