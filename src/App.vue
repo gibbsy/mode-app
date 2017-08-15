@@ -8,7 +8,6 @@
 </template>
 
 <script>
-import picturefill from 'picturefill';
 import $ from 'jquery';
 import Header from './components/Header.vue';
 
