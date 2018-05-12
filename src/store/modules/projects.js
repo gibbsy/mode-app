@@ -18,7 +18,7 @@ const mutations = {
         for (let i=0; i<data.length; i++) {
             arr.push( data[i].featured_image );
         }
-        console.log(arr);
+        //console.log(arr);
         state.featuredImages = arr;
     },
     'SET_CURRENT' (state, index) {

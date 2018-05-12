@@ -1,15 +1,13 @@
 <template>
   <header class="header">
-    <div id="header-inner-wrapper">
-      <div id="logo"> 
+    <div class="header__inner-wrapper">
+      <div class="header__logo"> 
        <img src="../assets/mode_logo_web.png">
       </div>
-      <div id="nav-wrapper">
-        <ul id="nav">
-          <li>Work</li>
-          <li>About</li>
-        </ul>
-      </div>
+      <ul class="header__nav">
+        <li class="active">Work</li>
+        <li>Info</li>
+      </ul>
     </div>
   </header>
 </template>
@@ -20,44 +18,47 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-
+<style lang="scss">
+@import '../style/variables.scss';
 .header {
   margin: 0;
-  padding: 0;
+  padding: 2.5rem 0 0 0;
   width: 100%;
-
-  #header-inner-wrapper {
-    width: 86%;
-    padding: 60px 0 180px 0;
-    margin: 0 auto;
-    display: block;
-    text-align: left;
-  }
-
-  #logo {
-    margin-left: 6px;
-    width: 15%;
-    display: inline-block;
+  .header__inner-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    .header__logo {
+    margin: 0;
+    width: 18%;
+    max-width: 250px;
     img {
       max-width: 100%;
     }
   }
 
-  #nav-wrapper {  
-    float: right;
-    ul {
+  .header__nav {  
       list-style: none;
       margin: 0;
-      padding: 16px 6px 0 0;
-    }
-    li {
-      font-size: 1.2em;
-      float: left;
-      margin-left: 20px;
-    }
-    li:first-child {
-      margin-left: 0;
+      font-family: 'Apercu-Medium', Helvetica, Arial, sans-serif;
+      letter-spacing: 2px;
+      li {
+        font-size: 1rem;
+        float: left;
+        margin-left: 1.6rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        &:first-child {
+        margin-left: 0;
+        }
+        &:hover {
+          color: $mode-blue;
+        }
+        &.active {
+          color: $mode-blue;
+          font-weight: bold;
+        }
+      }
     }
   }
 }

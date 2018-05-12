@@ -60,28 +60,36 @@ export default {
 
 <style lang="scss">
 @import 'style/html5reset.css';
-@import 'style/col.css';
-@import 'style/decimal.scss';
-@import 'style/grid.scss';
 @import 'style/mixins.scss';
+@import 'style/_variables.scss';
 
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: $body-bg;
+}
 
 #app {
-  font-family: 'gothamsl-book', Helvetica, Arial, sans-serif;
+  font-family: 'Apercu', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
-  background: #fff;
+  background-color: $body-bg;
+  display: grid;
+  width: 92%;
+  max-width: $max-layout-width;
+  grid: {
+    template-columns: 100%;
+    template-rows: 14rem auto 12rem;
+  }
 }
 
-.header {
-  display: block;
-}
-
-.view-toggle .header, .view-toggle #contents-outer-container #projects-thumbs-container {
+.view-toggle .header, .view-toggle .projects .projects__grid {
   display: none;
 }
 

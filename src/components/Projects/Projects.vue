@@ -1,5 +1,5 @@
 <template>
-  <div id="contents-outer-container">
+  <div class="projects">
   <transition 
     name="stage-right" 
     appear mode="out-in"
@@ -12,22 +12,20 @@
        <h1>Screen Density is {{ screenDensity }}</h1>
        <h1>Image res is {{ imageRes }}</h1> -->
  <preloader v-if="!dataLoaded || !imagesLoaded || gridRecalculating"></preloader>    
- <div id="projects-thumbs-container">
- <transition name="fade" appear mode="out-in">
-   <section id="project-thumbs-lrg" v-if="layoutSize=='lrg' && imagesLoaded">
-      <project-thumb 
-       v-for="(project, index) in projects"
-       :project="project" 
-       :key="index" 
-       :index="index" 
-       :myWidth="gridLayoutLrg[index]"
-       :myHeight="thumbHeight"
-       :res="imageRes"
-       :gridReady="gridReady">
-      </project-thumb>
-   </section>
-  </transition>
   <transition name="fade" appear mode="out-in">
+    <div class="projects__grid" v-if="imagesLoaded">
+        <project-thumb 
+        v-for="(project, index) in projects"
+        :project="project" 
+        :key="index" 
+        :index="index" 
+        :myWidth="gridLayoutLrg[index]"
+        :res="imageRes">
+        </project-thumb>
+    </div>
+  </transition>
+</div>
+  <!-- <transition name="fade" appear mode="out-in">
    <section id="project-thumbs-med" v-if="layoutSize=='med' && imagesLoaded">
       <project-thumb 
        v-for="(project, index) in projects"
@@ -54,12 +52,10 @@
        :gridReady="gridReady">
       </project-thumb>
    </section>
-   </transition>
-</div>
+   </transition> -->
  <!--      <section>
         <p>{{projects}}</p> 
       </section> -->
-  </div>
 </template>
 
 <script>
@@ -83,11 +79,12 @@ export default {
     packeryInit: false,
     gridRecalculating: false,
     resizing: false,
-    gridLayoutLrg : ['x-wide', 'wide',
+    gridLayoutLrg : [
+                  'x-wide', 'wide',
                   'wide', 'x-wide',
                   'narrow', 'wide', 'narrow',
                   'narrow', 'narrow', 'wide',
-                  'x-wide', 'wide',
+                  'wide', 'x-wide',
                   'narrow', 'narrow', 'wide',
                   'wide', 'x-wide',
                   'wide','narrow', 'narrow',
@@ -132,7 +129,7 @@ export default {
   },
   methods: {
     buildImageURLs() {
-      switch(this.layoutSize) 
+      /* switch(this.layoutSize) 
       {
         case 'lrg':
           this.imageURLs = this.lrgImageGrid();
@@ -146,8 +143,8 @@ export default {
 
         default: 
           console.log('error building array');
-      }
-
+      } */
+      this.imageURLs = this.lrgImageGrid();
       this.preloadImages();
 
     },
@@ -213,12 +210,9 @@ export default {
       let that = this;
       this.imagesLoaded = true;
       this.imageCache[this.layoutSize] = true;
-      console.dir(this.imageCache);
-      this.$nextTick(function() {
-        that.setThumbHeight();
-      })
+      //console.dir(this.imageCache);
     },
-    setThumbHeight() {
+    /* setThumbHeight() {
       let cWidth = $('#projects-thumbs-container').innerWidth(),
           wThumb = this.layoutSize == 'lrg' ? cWidth*(3/7) : cWidth,
           hThumb = this.layoutSize == 'lrg' ? wThumb*(9/16)-12 : wThumb*(1/2.32)-12;
@@ -230,8 +224,8 @@ export default {
               this.initGrid();
               else console.log('already init grid');
           })
-    },
-    initGrid() {  
+    }, */
+    /* initGrid() {  
       if(!this.grid) {
       let elem = document.getElementById('projects-thumbs-container');
       this.grid = new Packery( elem, {
@@ -264,7 +258,7 @@ export default {
       this.setVHeight();
       this.setThumbHeight();
       this.grid.layout();
-    },
+    }, */
     /*reloadGrid() {
       // called after dom updates
       this.grid.reloadItems();
@@ -335,7 +329,7 @@ export default {
     },
     layoutSize: function(val) {
       if(this.packeryInit) {  
-        console.log('layout size is ' + val + '... watching');
+        //console.log('layout size is ' + val + '... watching');
         // reset grid if the layout size changes
         this.gridRecalculating = true;
         this.resetGrid();
@@ -347,56 +341,35 @@ export default {
 
 <style lang="scss">
 @import '../../style/mixins.scss';
+@import '../../style/_variables.scss';
 
-#contents-outer-container {
+.projects {
   width: 100%;
   display: block;
 
-  #projects-thumbs-container {
-    width: 86%;
-    margin: 0 auto;
-    display: block;
-    padding-bottom: 200px;
-  }
-}
-
-.item {
-  background: #eaeaea;
-  border: 6px solid #fff;
-  box-sizing: border-box;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  cursor: pointer;
-  img {
-    max-width: 100%;
+  .projects__grid {
     width: 100%;
-    height: auto;
-    overflow: hidden;
-    transition: opacity 1s ease;
+    margin: 0 auto;
+    display: grid;
+    padding-bottom: 200px;
+    grid: {
+      template-columns: repeat(14, 1fr);
+      auto-rows: 18rem;
+      gap: 0.75rem;
+    }
+    @include bp(lrg) {  
+         grid-auto-rows: 20rem;
+     }
+      @include bp(xlrg) {  
+         grid-auto-rows: 22rem;
+         grid-gap: 1rem;
+     }
+      @include bp(huge) {  
+          grid-auto-rows: 24rem;
+          grid-gap: 1.4rem;
+      }
   }
+}
 
-}
-.item.item--wide {
-  @include bp(lrg) {  
-    width: percentage(3/7);
-  }
-  //@include aspect-ratio(16,9);
-}
-.item.item--x-wide {
-  @include bp(lrg) { 
-    width: percentage(4/7);
-  }
-  //@include aspect-ratio(100,43.68932038835);
-}
-.item.item--narrow {
-  @include bp(med) {
-    width: calc(50% - 3px);
-  }
-  @include bp(lrg) {
-    width: percentage(2/7);
-  }
-  //@include aspect-ratio(100, 87.378640776699);
-}
 
 </style>

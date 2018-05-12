@@ -1,21 +1,19 @@
 <template>
   <div :id="project.slug" :class="colWidth" @click="viewProject(index, project)">
-    <div class="overlay-panel">  
-      <div class="overlay-bg"></div>
-      <div class="item-info">
-        <h1 class="project-title">{{ project.title }}</h1>
-        <h2 class="client-name">{{ project.custom_fields.client }}</h2>
-
+    <div class="project__info--bg-image" :style="bgImage"></div>
+    <div class="project__info">  
+      <div class="project__info--contents">
+        <h1 class="project__info--title">{{ project.title }}</h1>
+        <h2 class="project__info--client">{{ project.custom_fields.client }}</h2>
       </div>
     </div>
-    <img :src="imgPath">
   </div>
 </template>
 
 <script>
 import $ from 'jquery';
 export default {
-  props: ['project', 'myWidth', 'myHeight', 'index', 'res', 'gridReady'],
+  props: ['project', 'myWidth', 'index', 'res'],
   data() {
     return {
       reveal : false,
@@ -28,20 +26,23 @@ export default {
     colWidth() {
       if ( !this.reveal ) {
         return {
-          'item item--narrow hidden': this.myWidth == 'narrow',
-          'item item--wide hidden': this.myWidth == 'wide',
-          'item item--x-wide hidden': this.myWidth == 'x-wide'
+          'project__thumbnail--narrow hidden': this.myWidth == 'narrow',
+          'project__thumbnail--wide hidden': this.myWidth == 'wide',
+          'project__thumbnail--x-wide hidden': this.myWidth == 'x-wide'
         }
       } else { 
         return {
-        'item item--narrow': this.myWidth == 'narrow',
-        'item item--wide': this.myWidth == 'wide',
-        'item item--x-wide': this.myWidth == 'x-wide'
+        'project__thumbnail--narrow': this.myWidth == 'narrow',
+        'project__thumbnail--wide': this.myWidth == 'wide',
+        'project__thumbnail--x-wide': this.myWidth == 'x-wide'
         }
       }
     },
     imgPath() {
       return 'static/thumbs-' + this.myWidth + '-assets/' + this.res + '/' + this.project.featured_image;
+    },
+    bgImage() {
+      return { background: 'url(' + this.imgPath + ') no-repeat center/cover, #eaeaea' }
     },
     windowScrolled() {
       return this.$store.getters.scrollPos;
@@ -86,13 +87,11 @@ export default {
       }
     }
   },
+  mounted() {
+    this.getElCoords();
+    this.checkInView();
+  },
   watch: {
-    gridReady: function(val) {
-      if(val) {
-        this.getElCoords();
-        this.checkInView();
-      }
-    },
     inView: function(val) {
       if(val) {
         this.revealOnScroll();
@@ -103,52 +102,92 @@ export default {
 </script>
 
 <style lang="scss">
-.hidden {
-  img {  
+@import '../../style/mixins.scss';
+@import '../../style/_variables.scss';
+
+@mixin grid-item() {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: opacity 1s ease;
+  &:hover > .project__info {
+    opacity: 1;
+  }
+  &:hover > .project__info--bg-image {
+    filter: blur(4px);
+  }
+  &.hidden { 
     opacity: 0;
   }
 }
-.item-info {
+.project__thumbnail--wide {
+  @include grid-item();
+  grid-column-end: span 14;
+  @include bp(med) {
+    grid-column-end: span 7;
+  }
+  @include bp(lrg) {  
+    grid-column-end: span 6;
+  }
+}
+.project__thumbnail--x-wide {
+  @include grid-item();  
+  grid-column-end: span 14;
+  @include bp(med) {
+    grid-column-end: span 7;
+  }
+  @include bp(lrg) { 
+    grid-column-end: span 8;
+  }
+}
+.project__thumbnail--narrow {
+  @include grid-item();
+    grid-column-end: span 14;
+  @include bp(med) {
+    grid-column-end: span 7;
+  }
+  @include bp(lrg) {
+    grid-column-end: span 4;
+  }
+}
+.project__info--bg-image {
   position: absolute;
-  text-align: left;
-  padding: 18em 2em 2em 2em;
+  top:0;
+  left: 0;
+  width: 100%;
+  height:100%;
+  z-index: 0;
+}
+.project__info {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  box-sizing: border-box;
+  opacity: 0;
+  transition: opacity 0.5s;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+  border: 8px solid rgba($mode-purple, 0.6);
+  background: $mode-purple; 
+  background: linear-gradient(45deg, rgba($mode-purple, 0.6) 0%, rgba($mode-blue, 0.6) 100%);
+  z-index: 1;
+
+  .project__info--contents {
+  text-align: left;
+  padding: 2em;
   h1 {
     font-size: 1.5em;
     color: #f0f0f0;
-    padding: 5px 0;
     max-width: 100%;
   }
   h2 {
     font-size: 1em;
     color: #f0f0f0;
     max-width: 100%;
+    margin-top: 8px;
   }
 }
-.item:hover > .overlay-panel {
-  opacity: 0.9;
-}
-
-.overlay-bg {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: #111;
-  opacity: 0.7;
-  border: 8px solid #33007e;
-  box-sizing: border-box;
-  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#8b4be9+0,1b7af1+100 */
-  background: #33007e; /* Old browsers */
-  background: -moz-linear-gradient(45deg, #33007e 0%, #1b7af1 100%); /* FF3.6-15 */
-  background: -webkit-linear-gradient(45deg, #33007e 0%,#1b7af1 100%); /* Chrome10-25,Safari5.1-6 */
-  background: linear-gradient(45deg, #33007e 0%,#1b7af1 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#8b4be9', endColorstr='#1b7af1',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
-  
-}
-.overlay-panel {
-  opacity: 0;
-  transition: opacity 0.5s;
 }
 </style>
