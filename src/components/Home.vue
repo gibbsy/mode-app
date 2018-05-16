@@ -1,16 +1,5 @@
 <template>
   <div class="projects">
-  <transition 
-    name="stage-right" 
-    appear mode="out-in"
-    v-on:after-enter="afterEnter"
-    v-on:before-leave="beforeLeave">
-    <router-view></router-view>
-  </transition>
-      <!-- <h1>Layout size is {{ layoutSize }}</h1>
-       <h1>Viewportwidth is {{ viewportWidth }}</h1>
-       <h1>Screen Density is {{ screenDensity }}</h1>
-       <h1>Image res is {{ imageRes }}</h1> -->
  <preloader v-if="!dataLoaded || !imagesLoaded || gridRecalculating"></preloader>    
   <transition name="fade" appear mode="out-in">
     <div class="projects__grid" v-if="imagesLoaded">
@@ -24,47 +13,15 @@
         </project-thumb>
     </div>
   </transition>
+  <router-view></router-view>
 </div>
-  <!-- <transition name="fade" appear mode="out-in">
-   <section id="project-thumbs-med" v-if="layoutSize=='med' && imagesLoaded">
-      <project-thumb 
-       v-for="(project, index) in projects"
-       :project="project" 
-       :key="index" 
-       :index="index" 
-       :myWidth="index % 3 == 0 ? 'wide' : 'narrow'"
-       :myHeight="thumbHeight"
-       :res="imageRes"
-       :gridReady="gridReady">
-      </project-thumb>
-   </section>
-   </transition>
-   <transition name="fade" appear mode="out-in">
-   <section id="project-thumbs-sml" v-if="layoutSize=='sml' && imagesLoaded">
-      <project-thumb 
-       v-for="(project, index) in projects"
-       :project="project" 
-       :key="index" 
-       :index="index" 
-       :myWidth="'x-wide'"
-       :myHeight="thumbHeight"
-       :res="imageRes"
-       :gridReady="gridReady">
-      </project-thumb>
-   </section>
-   </transition> -->
- <!--      <section>
-        <p>{{projects}}</p> 
-      </section> -->
 </template>
 
 <script>
 import $ from 'jquery';
-import Packery from 'packery';
-import LazyLoad from 'vanilla-lazyload';
-import ProjectThumb from './ProjectThumb.vue';
-import Preloader from '../Shared/Preloader.vue';
-import { responsiveUtils } from '../Mixins/responsiveMixin';
+import ProjectThumb from './projects/ProjectThumb.vue';
+import Preloader from './Shared/Preloader.vue';
+import { responsiveUtils } from './Mixins/responsiveMixin';
 
 export default {
   mixins: [ responsiveUtils ],
@@ -184,7 +141,6 @@ export default {
       return imgs;
     },
     preloadImages() {
-
       let l = this.imageURLs.length;
       for (let i = 0; i < l; i++) {
           this.loadImage(this.imageURLs[i]);
@@ -207,10 +163,8 @@ export default {
       }
     },
     triggerLayout() {
-      let that = this;
       this.imagesLoaded = true;
       this.imageCache[this.layoutSize] = true;
-      //console.dir(this.imageCache);
     },
     /* setThumbHeight() {
       let cWidth = $('#projects-thumbs-container').innerWidth(),
@@ -282,14 +236,6 @@ export default {
         }
       });
     },
-    afterEnter() {
-      console.log('projectView')
-      this.$store.dispatch('setProjectView', true);
-    },
-    beforeLeave() {
-      console.log('homeView')
-       this.$store.dispatch('setProjectView', false);
-    },
     resetGrid() {
       /*this.grid.destroy();
       this.grid = {};*/
@@ -340,8 +286,8 @@ export default {
 </script>
 
 <style lang="scss">
-@import '../../style/mixins.scss';
-@import '../../style/_variables.scss';
+@import '../style/mixins.scss';
+@import '../style/_variables.scss';
 
 .projects {
   width: 100%;

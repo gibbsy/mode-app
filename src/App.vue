@@ -67,6 +67,10 @@ export default {
   box-sizing: border-box;
 }
 
+h1, h2, h3, h4, h5 {
+  font-weight: normal;
+}
+
 body {
   background-color: $body-bg;
 }
