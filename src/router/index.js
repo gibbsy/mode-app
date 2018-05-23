@@ -10,13 +10,15 @@ export default new Router({
     {
       path: '/',
       name: 'Home',
-      component: Home,
-      children: [
-        {
-          path: '/project/:slug',
-          component: Project
-        }
-      ]
+      component: Home
+    },
+    {
+      path: '/project/:slug',
+      name: 'Project',
+      component: Project
     }
-  ]
+  ],
+  scrollBehavior(to, from, savedPosition) {
+    return { x: 0, y: 0 }
+  }
 })

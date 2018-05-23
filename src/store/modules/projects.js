@@ -1,49 +1,42 @@
-import Vue from 'vue';
-
 const state = {
     projects: null,
-    isLoaded: false,
+    dataLoaded: false,
     intro: true,
     featuredImages: [],
-    currentProject: {}
+    currentProject: {},
+    currentIndex: -1
 };
 
 const mutations = {
-    'SET_WORK' (state, data) {
+    'SET_PROJECTS'(state, data) {
         state.projects = data;
-        state.isLoaded = true;
+        state.dataLoaded = true;
     },
-    'SET_FEATURED' (state, data) {
-        let arr = [];
-        for (let i=0; i<data.length; i++) {
-            arr.push( data[i].featured_image );
+    'SET_FEATURED'(state, data) {
+        let imgs = [];
+        for (let i = 0; i < data.length; i++) {
+            imgs.push(data[i].featured_image);
         }
-        //console.log(arr);
-        state.featuredImages = arr;
+        state.featuredImages = imgs;
     },
-    'SET_CURRENT' (state, index) {
+    'SET_CURRENT'(state, index) {
         state.currentProject = state.projects[index];
+        state.currentIndex = index;
     },
-    'INTRO_DONE' (state) {
+    'INTRO_DONE'(state) {
         state.intro = false;
     }
 };
 
 const actions = {
-    loadData({commit}) {
-         Vue.http.get('projects?per_page=30')
-        .then(response => response.json())
-        .then(data => {
-            //any data transformations here
-            //console.log(data[0].custom_fields.project_content[0].embedded_media.vimeo_embed);
-             commit('SET_WORK', data);
-             commit('SET_FEATURED', data);
-        });
+    setProjects({ commit }, data) {
+        commit('SET_PROJECTS', data);
+        commit('SET_FEATURED', data);
     },
-    setCurrent({commit},selectedIndex) {
+    setCurrent({ commit }, selectedIndex) {
         commit('SET_CURRENT', selectedIndex);
     },
-     setIntroDone({commit}) {
+    setIntroDone({ commit }) {
         commit('INTRO_DONE');
     }
 };
@@ -58,11 +51,14 @@ const getters = {
     currentProject: state => {
         return state.currentProject;
     },
-    isLoaded: state => {
-        return state.isLoaded;
+    dataLoaded: state => {
+        return state.dataLoaded;
     },
     isIntro: state => {
         return state.intro;
+    },
+    currentIndex: state => {
+        return state.currentIndex;
     }
 };
 

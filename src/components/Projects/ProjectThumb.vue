@@ -2,9 +2,9 @@
   <div :id="project.slug" :class="colWidth" @click="viewProject(index, project)">
     <div class="project__info--bg-image" :style="bgImage"></div>
     <div class="project__info">  
-      <div class="project__info--contents">
+      <div class="project__info--contents" v-if="project.project_info.client">
         <h1 class="project__info--title">{{ project.title }}</h1>
-        <h2 class="project__info--client">{{ project.custom_fields.client }}</h2>
+        <h2 class="project__info--client">{{ project.project_info.client }}</h2>
       </div>
     </div>
   </div>
@@ -28,13 +28,15 @@ export default {
         return {
           'project__thumbnail--narrow hidden': this.myWidth == 'narrow',
           'project__thumbnail--wide hidden': this.myWidth == 'wide',
-          'project__thumbnail--x-wide hidden': this.myWidth == 'x-wide'
+          'project__thumbnail--x-wide hidden': this.myWidth == 'x-wide',
+          'projects__grid-item': true
         }
       } else { 
         return {
         'project__thumbnail--narrow': this.myWidth == 'narrow',
         'project__thumbnail--wide': this.myWidth == 'wide',
-        'project__thumbnail--x-wide': this.myWidth == 'x-wide'
+        'project__thumbnail--x-wide': this.myWidth == 'x-wide',
+        'projects__grid-item': true
         }
       }
     },
@@ -88,6 +90,7 @@ export default {
     }
   },
   mounted() {
+    //console.log(this.project);
     this.getElCoords();
     this.checkInView();
   },

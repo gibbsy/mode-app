@@ -9,9 +9,6 @@ export const responsiveUtils = {
     viewportHeight() {
       return this.$store.getters.viewportHeight;
     },
-    layoutSize() {
-      return this.$store.getters.layoutSize;
-    },
     screenDensity() {
       return device_pixel_ratio();
     },

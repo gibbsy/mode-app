@@ -14,20 +14,18 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 #preloader {
   position: fixed;
   top: 0;
   left: 0;
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100%;
-  background: #ccc;
+  background: #fff;
   z-index: 1000;
-  h1 {
-    position: absolute;
-    top: 50vh;
-    width: 100%;
-  }
+
 }
 </style>

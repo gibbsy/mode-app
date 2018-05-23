@@ -1,7 +1,6 @@
 const state = {
     viewportWidth : null,
-    viewportHeight : null,
-    projectView: false
+    viewportHeight : null
 };
 
 const mutations = {
@@ -44,9 +43,6 @@ const getters = {
             return 'lrg';
         else if ( state.viewportWidth == null )
             return 'layout size not set';
-    },
-    projectView: state => {
-        return state.projectView;
     }
 };
 
