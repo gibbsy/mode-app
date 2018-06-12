@@ -90,9 +90,12 @@ export default {
             let fade = 1-(pushRight*0.01);
             TweenMax.to(this, 1.2, {x: pushRight, opacity: fade, ease: Power2.easeOut})
           })
-          window.setTimeout(() => {
+          /* window.setTimeout(() => {
             this.animating = false;
-          }, 1000/60);
+          }, 1000/60); */
+          requestAnimationFrame(() => {
+            this.animating = false;
+          })
         }
       })
       container.mouseout(function(evt){

@@ -91,7 +91,7 @@ export default {
       project: {},
       imageUrls: [],
       contentLoaded: false,
-      gridTracks: 16,
+      gridTracks: 8,
       transitioning: true,
       showMenu: false
     };
@@ -367,7 +367,7 @@ export default {
     width: 100%;
     height: 100vh;
     display: grid;
-    grid-template-columns: repeat(16, 1fr);
+    grid-template-columns: repeat(8, 1fr);
     span {
       border-left: 1px solid #eee;
     }
