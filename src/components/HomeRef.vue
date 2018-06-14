@@ -1,0 +1,246 @@
+<template>
+<div class="home__inner-wrapper">
+  <transition name="fade" appear mode="out-in">
+  <app-header></app-header>
+  </transition>
+  <div class="projects">
+  <preloader v-if="showPreloader"></preloader>  
+    <transition name="fade" appear mode="out-in">
+      <div class="projects__grid" v-if="imagesLoaded">
+        <project-thumb 
+          v-for="(project, index) in projects"
+          :project="project" 
+          :key="index" 
+          :index="index" 
+          :myWidth="gridLayoutLrg[index]"
+          :res="imageRes">
+        </project-thumb>
+      </div>
+    </transition>
+  </div>
+</div>
+</template>
+<script>
+import $ from "jquery";
+import Header from "./Header.vue";
+import ProjectThumb from "./projects/ProjectThumb.vue";
+import Preloader from "./Shared/Preloader.vue";
+import { responsiveUtils } from "./Mixins/responsiveMixin";
+
+export default {
+  mixins: [responsiveUtils],
+  components: {
+    appHeader: Header,
+    projectThumb: ProjectThumb,
+    preloader: Preloader
+  },
+  data() {
+    return {
+      layoutSize: null,
+      resizing: false,
+      gridLayoutLrg: [
+        "x-wide","wide",
+        "wide","x-wide",
+        "narrow","wide","narrow",
+        "narrow","narrow","wide",
+        "wide","x-wide",
+        "narrow","narrow","wide",
+        "wide","x-wide",
+        "wide","narrow","narrow",
+        "narrow","wide","narrow",
+        "x-wide","wide",
+        "wide","x-wide",
+        "narrow","wide","narrow",
+        "narrow","narrow","wide",
+        "x-wide","wide",
+        "wide","x-wide",
+        "wide","narrow","narrow",
+        "narrow","wide","narrow"
+      ],
+      imagesLoaded: false,
+      showPreloader: false,
+      imageURLs: []
+    };
+  }, //end data
+  computed: {
+    projects() {
+      return this.$store.getters.projects;
+    },
+    featuredImages() {
+      return this.$store.getters.featuredImages;
+    },
+    numProjects() {
+      if (this.projects) return this.projects.length;
+    },
+    dataLoaded() {
+      return this.$store.getters.dataLoaded;
+    }
+  }, // end comp
+  methods: {
+    buildImageURLs() {
+      //console.log(this.projects);
+      /* switch(this.layoutSize) 
+      {
+        case 'lrg':
+          this.imageURLs = this.lrgImageGrid();
+          break;
+        case 'med':
+          this.imageURLs = this.medImageGrid();
+          break;
+        case 'sml':
+          this.imageURLs = this.smlImageGrid();
+          break;
+
+        default: 
+          console.log('error building array');
+      } */
+      this.imageURLs = this.lrgImageGrid();
+      this.preloadImages();
+    },
+    lrgImageGrid() {
+      let imgs = [];
+
+      for (let i = 0; i < this.featuredImages.length; i++) {
+        let iLoc =
+          "static/thumbs-" +
+          this.gridLayoutLrg[i] +
+          "-assets/" +
+          this.imageRes +
+          "/";
+
+        imgs.push(iLoc + this.featuredImages[i]);
+      }
+      return imgs;
+    },
+    medImageGrid() {
+      let imgs = [];
+
+      for (let i = 0; i < this.featuredImages.length; i++) {
+        let iWidth = i % 3 == 0 ? "x-wide" : "narrow";
+
+        let iLoc = "static/thumbs-" + iWidth + "-assets/" + this.imageRes + "/";
+
+        imgs.push(iLoc + this.featuredImages[i]);
+      }
+      return imgs;
+    },
+    smlImageGrid() {
+      let imgs = [];
+
+      for (let i = 0; i < this.featuredImages.length; i++) {
+        let iLoc = "static/thumbs-x-wide-assets/" + this.imageRes + "/";
+
+        imgs.push(iLoc + this.featuredImages[i]);
+      }
+      return imgs;
+    },
+    preloadImages() {
+      console.log("preload");
+      const queue = new createjs.LoadQueue();
+      queue.on(
+        "complete",
+        function() {
+          this.imagesLoaded = true;
+          this.showPreloader = false;
+        },
+        this
+      );
+
+      queue.loadManifest(this.imageURLs);
+    },
+    scrollListener() {
+    $(window).scroll(function() {
+      const grid = $('.projects__grid');
+      $('.projects__grid-item').each(function(el){
+        TweenMax.to(this, 1, {marginTop: '+=50'})
+      })
+      console.log('scroll');
+      })
+    }
+  },
+  /* resizeListener() {
+      let that = this,
+          resizeTimer;
+      $( window ).resize(function(e) {
+        that.resizing = true;
+        resizeTimer = setTimeout(function() {
+              that.resizing = false;
+        }, 250);
+      });
+    }
+  }, */
+  created() {
+    this.layoutSize = this.$store.getters.layoutSize;
+    console.log(this.layoutSize);
+    if (this.$store.getters.dataLoaded) {
+      // data exists in store -- been here before
+          this.buildImageURLs();
+    } else {
+      // watcher will decide when it's ready
+      //show preloader
+      this.showPreloader = true;
+    }
+  },
+  mounted() {
+    //this.scrollListener();
+  },
+  watch: {
+    dataLoaded: function(val) {
+      if (val) {
+        console.log(val);
+        this.layoutSize = this.$store.getters.layoutSize;
+        this.$nextTick(function() {
+          this.buildImageURLs();
+        });
+      }
+    }
+  }
+};
+</script>
+
+<style lang="scss">
+@import "../style/mixins.scss";
+@import "../style/_variables.scss";
+
+.home__inner-wrapper {
+  color: #2c3e50;
+  margin: 0 auto;
+  padding: 0;
+  background-color: $body-bg;
+  display: grid;
+  width: 92%;
+  max-width: $max-layout-width;
+  grid: {
+    template-columns: 100%;
+    template-rows: 14rem auto 12rem;
+  }
+}
+
+.projects {
+  width: 100%;
+  display: block;
+
+  .projects__grid {
+    width: 100%;
+    margin: 0 auto;
+    display: grid;
+    padding-bottom: 200px;
+    grid: {
+      template-columns: repeat(14, 1fr);
+      auto-rows: 18rem;
+      gap: 0.75rem;
+    }
+    @include bp(lrg) {
+      grid-auto-rows: 20rem;
+    }
+    @include bp(xlrg) {
+      grid-auto-rows: 22rem;
+      grid-gap: 1rem;
+    }
+    @include bp(huge) {
+      grid-auto-rows: 24rem;
+      grid-gap: 1.4rem;
+    }
+  }
+}
+</style>
