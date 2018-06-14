@@ -1,8 +1,15 @@
 <template>
 <div class="home__inner-wrapper">
   <transition name="fade" appear mode="out-in">
-  <app-header></app-header>
-  </transition>
+<!--   <app-header></app-header>
+ -->  </transition>
+ <div class="home-page__ui-right">
+   <div class="ui-right__logo"> 
+       <img src="../assets/mode_sq_b.png">
+    </div>
+    <a href="#" id="info-btn" class="info__link"><h3>Info</h3></a>
+    <social-icons></social-icons>
+ </div>
   <div class="projects">
   <preloader v-if="showPreloader"></preloader>  
     <transition name="fade" appear mode="out-in">
@@ -24,6 +31,7 @@
 import $ from "jquery";
 import Header from "./Header.vue";
 import ProjectThumb from "./projects/ProjectThumb.vue";
+import SocialIcons from './Shared/SocialIcons.vue';
 import Preloader from "./Shared/Preloader.vue";
 import { responsiveUtils } from "./Mixins/responsiveMixin";
 
@@ -32,30 +40,38 @@ export default {
   components: {
     appHeader: Header,
     projectThumb: ProjectThumb,
-    preloader: Preloader
+    preloader: Preloader,
+    socialIcons: SocialIcons
   },
   data() {
     return {
       layoutSize: null,
       resizing: false,
       gridLayoutLrg: [
-        "x-wide","wide",
-        "wide","x-wide",
-        "narrow","wide","narrow",
-        "narrow","narrow","wide",
-        "wide","x-wide",
-        "narrow","narrow","wide",
-        "wide","x-wide",
-        "wide","narrow","narrow",
-        "narrow","wide","narrow",
-        "x-wide","wide",
-        "wide","x-wide",
-        "narrow","wide","narrow",
-        "narrow","narrow","wide",
-        "x-wide","wide",
-        "wide","x-wide",
-        "wide","narrow","narrow",
-        "narrow","wide","narrow"
+        "x-wide",
+        "wide",
+        "wide",
+        "x-wide",
+        "x-wide",
+        "wide",
+        "wide",
+        "x-wide",
+        "x-wide",
+        "wide",
+        "wide",
+        "x-wide",
+        "x-wide",
+        "wide",
+        "wide",
+        "x-wide",
+        "x-wide",
+        "wide",
+        "wide",
+        "x-wide",
+        "x-wide",
+        "wide",
+        "wide",
+        "x-wide"
       ],
       imagesLoaded: false,
       showPreloader: false,
@@ -149,13 +165,13 @@ export default {
       queue.loadManifest(this.imageURLs);
     },
     scrollListener() {
-    $(window).scroll(function() {
-      const grid = $('.projects__grid');
-      $('.projects__grid-item').each(function(el){
-        TweenMax.to(this, 1, {marginTop: '+=50'})
-      })
-      console.log('scroll');
-      })
+      $(window).scroll(function() {
+        const grid = $(".projects__grid");
+        $(".projects__grid-item").each(function(el) {
+          TweenMax.to(this, 1, { marginTop: "+=50" });
+        });
+        console.log("scroll");
+      });
     }
   },
   /* resizeListener() {
@@ -174,7 +190,7 @@ export default {
     console.log(this.layoutSize);
     if (this.$store.getters.dataLoaded) {
       // data exists in store -- been here before
-          this.buildImageURLs();
+      this.buildImageURLs();
     } else {
       // watcher will decide when it's ready
       //show preloader
@@ -208,38 +224,80 @@ export default {
   padding: 0;
   background-color: $body-bg;
   display: grid;
-  width: 92%;
+  width: 100%;
   max-width: $max-layout-width;
   grid: {
-    template-columns: 100%;
-    template-rows: 14rem auto 12rem;
+    template-columns: 1fr 14rem;
+    template-rows: 14rem auto 14rem;
+  }
+}
+
+.home-page__ui-right {
+  position: fixed;
+  width: 14rem;
+  height: 100vh;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  .ui-right__logo {
+    margin-top: 40px;
+    width: 100px;
+    img {
+      max-width: 100%;
+    }
+  }
+  .info__link {
+    position: relative;
+    text-decoration: none;
+    margin-top: auto; 
+    margin-bottom: 2rem;
+    //opacity: 0;
+    &:before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 0;
+      width: 2px;
+      height: 2rem;
+      background: $mode-purple;
+    }
+    h3 {
+      @include rotate-link();
+    }
+  }
+  .social-icons {
+    margin-bottom: 5rem;
   }
 }
 
 .projects {
-  width: 100%;
-  display: block;
+  grid-column: 1 / span 1;
+  grid-row: 2 / span 1;
 
   .projects__grid {
     width: 100%;
     margin: 0 auto;
+    padding-left: 5px;
     display: grid;
-    padding-bottom: 200px;
     grid: {
       template-columns: repeat(14, 1fr);
       auto-rows: 18rem;
-      gap: 0.75rem;
+      //gap: 0.75rem;
+      gap: 5px;
     }
     @include bp(lrg) {
       grid-auto-rows: 20rem;
     }
     @include bp(xlrg) {
-      grid-auto-rows: 22rem;
-      grid-gap: 1rem;
+      grid-auto-rows: 28rem;
+      //grid-gap: 1rem;
     }
     @include bp(huge) {
-      grid-auto-rows: 24rem;
-      grid-gap: 1.4rem;
+      grid-auto-rows: 34rem;
+      //grid-gap: 1.4rem;
     }
   }
 }

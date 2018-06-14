@@ -26,9 +26,9 @@ export default {
     colWidth() {
       if ( !this.reveal ) {
         return {
-          'project__thumbnail--narrow hidden': this.myWidth == 'narrow',
-          'project__thumbnail--wide hidden': this.myWidth == 'wide',
-          'project__thumbnail--x-wide hidden': this.myWidth == 'x-wide',
+          'project__thumbnail--narrow  hidden': this.myWidth == 'narrow',
+          'project__thumbnail--wide  hidden': this.myWidth == 'wide',
+          'project__thumbnail--x-wide  hidden': this.myWidth == 'x-wide',
           'projects__grid-item': true
         }
       } else { 
@@ -160,6 +160,7 @@ export default {
   width: 100%;
   height:100%;
   z-index: 0;
+  //filter: grayscale(100%);
 }
 .project__info {
   position: absolute;
@@ -172,9 +173,10 @@ export default {
   display: flex;
   justify-content: flex-start;
   align-items: flex-end;
-  border: 8px solid rgba($mode-purple, 0.6);
+  border: 5px solid rgba($mode-purple, 0.6);
   background: $mode-purple; 
   background: linear-gradient(45deg, rgba($mode-purple, 0.6) 0%, rgba($mode-blue, 0.6) 100%);
+//background: linear-gradient(0deg, rgba(#000, 0.4) 0%, rgba(#000, 0.1) 50%);
   z-index: 1;
 
   .project__info--contents {

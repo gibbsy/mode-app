@@ -1,7 +1,7 @@
 <template>
     <section :id="project.slug+'-full'" class="project-page__container">
       <div class="project-page__reveal" v-if="transitioning">
-      <div id="reveal-1"></div><div id="reveal-2"></div><div id="reveal-3"></div><div id="reveal-4"></div><div id="reveal-5"></div>
+      <div id="reveal-1"></div><div id="reveal-2"></div>
     </div>
     <div class="grid-background__fixed" v-if="contentLoaded">
       <span v-for="track in gridTracks" :key="track"></span>
@@ -109,22 +109,13 @@ export default {
   methods: {
     transitionIn() {
       console.log("transition");
-      let that = this;
-      let reveal1 = document.getElementById("reveal-1"),
-        reveal2 = document.getElementById("reveal-2"),
-        reveal3 = document.getElementById("reveal-3"),
-        reveal4 = document.getElementById("reveal-4"),
-        reveal5 = document.getElementById("reveal-5");
+      const that = this;
+      const reveal1 = document.getElementById("reveal-1"),
+            reveal2 = document.getElementById("reveal-2");
 
-      let tl_transition = new TimelineMax({ onComplete: that.loadHero })
-        .set(reveal5, { x: "-=100%" })
-        .set(reveal3, { x: "-=100%" })
+      const tl_transition = new TimelineMax({ onComplete: that.loadHero })
         .set(reveal2, { x: "-=100%" })
-        .set(reveal4, { x: "-=100%" })
         .set(reveal1, { x: "-=100%" })
-        .to(reveal5, 0.5, { x: "+=100%", ease: Power1.easeIn })
-        .to(reveal4, 0.5, { x: "+=100%", ease: Power1.easeIn }, 0.1)
-        .to(reveal3, 0.5, { x: "+=100%", ease: Power1.easeIn }, 0.2)
         .to(reveal2, 0.5, { x: "+=100%", ease: Power1.easeIn }, 0.3)
         .to(reveal1, 0.5, { x: "+=100%", ease: Power1.easeIn }, 0.5);
     },
@@ -132,9 +123,6 @@ export default {
       const that = this;
       const reveal1 = document.getElementById("reveal-1"),
             reveal2 = document.getElementById("reveal-2"),
-            reveal3 = document.getElementById("reveal-3"),
-            reveal4 = document.getElementById("reveal-4"),
-            reveal5 = document.getElementById("reveal-5"),
             tags1 = $("#tags-roles"),
             tags2 = document.getElementById("tags-tech"),
             tags3 = document.getElementById("tags-agency"),
@@ -176,17 +164,14 @@ export default {
         .set(tags2, { x: "+=50px", opacity: 0 })
         .set(tags3, { x: "+=50px", opacity: 0 })
         .set(tags4, { x: "+=50px", opacity: 0 })
-        .set(hero, { x: "-=200px", opacity: 0 })
+        .set(hero, { width: 0 })
         .set(title, { y: "+=50px" })
         .set(subtitle, { y: "+=50px" })
         .set(intro, { y: "+=50px", opacity: 0 })
         .to(reveal1, 0.5, { x: "100%", ease: Power1.easeIn })
         .to(reveal2, 0.5, { x: "100%", ease: Power1.easeIn }, 0.1)
-        .to(reveal3, 0.5, { x: "100%", ease: Power1.easeIn }, 0.2)
-        .to(reveal4, 0.5, { x: "100%", ease: Power1.easeIn }, 0.3)
-        .to(reveal5, 0.5, { x: "100%", ease: Power1.easeIn }, 0.5)
         .to(tags1, 0.75, { opacity: 1, x: 0, ease: Power2.easeOut }, 0.5)
-        .to(hero, 1, { opacity: 1, x: 0, ease: Power2.easeOut }, 0.25)
+        .to(hero, 1, { width: '100%', ease: Power2.easeOut }, 0.25)
         .to(tags2, 0.75, { opacity: 1, x: 0, ease: Power2.easeOut }, 0.7)
         .to(tags3, 0.75, { opacity: 1, x: 0, ease: Power2.easeOut }, 0.8)
         .to(tags4, 0.75, { opacity: 1, x: 0, ease: Power2.easeOut }, 0.9)
@@ -297,44 +282,6 @@ export default {
 @import "../../style/_variables.scss";
 @import "../../style/mixins.scss";
 
-@mixin rotate-link() {
-  text-transform: uppercase;
-  transform: rotate(90deg);
-  letter-spacing: 4px;
-  font-size: 0.8rem;
-  margin-top: 3.5rem;
-}
-
-@mixin rule-above() {
-  &:before {
-    content: "";
-    position: absolute;
-    width: 2rem;
-    height: 2px;
-    background-color: $mode-purple;
-  }
-}
-
-@mixin content-shadow() {
-  box-shadow: #ccc 1px 1px 8px 2px;
-}
-
-@mixin caption-styles() {
-  h3 {
-    text-transform: uppercase;
-    color: $mode_purple;
-    font-size: 0.8rem;
-    letter-spacing: 2px;
-    margin-top: 1.2rem;
-  }
-  p {
-    font-size: 0.9rem;
-    padding-top: 0.5rem;
-    letter-spacing: 1px;
-    line-height: 1.4;
-  }
-}
-
 .project-page__container {
   position: absolute;
   top: 0;
@@ -357,8 +304,9 @@ export default {
     div {
       position: relative;
       width: 100%;
-      height: 20vh;
+      height: 50vh;
       background-color: $mode-purple;
+      background-color:#111;
     }
   }
 
@@ -378,9 +326,9 @@ export default {
     text-align: left;
     grid: {
       template-columns: repeat(16, 1fr);
-      template-rows: [header-start] 4rem [header-end intro-start] 80vh
+      template-rows: [header-start] 5rem [header-end intro-start] 65vh
         [intro-end project-content-start] auto [project-content-end
-        footer-start] 20rem [footer-end];
+        footer-start] 14rem [footer-end];
     }
     width: 100%;
     height: auto;
