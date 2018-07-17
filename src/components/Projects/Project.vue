@@ -3,14 +3,20 @@
       <div class="project-page__reveal" v-if="transitioning">
       <div id="reveal-1"></div><div id="reveal-2"></div>
     </div>
-    <div class="grid-background__fixed" v-if="contentLoaded">
+    <!-- <div class="grid-background__fixed" v-if="contentLoaded">
       <span v-for="track in gridTracks" :key="track"></span>
-    </div>
-    <transition name="fade" appear>
-      <project-menu v-if="showMenu" :key="$route.params.slug"></project-menu>
+    </div> -->
+    <transition name="fade" appear mode="in-out">
+      <project-menu v-if="showMenu" :key="$route.params.slug" :scrollPos="scrollPos"></project-menu>
     </transition>
       <div class="project-page__grid-wrapper" v-if="contentLoaded" :class="{menu: showMenu}">
+       <!--  <div class="project-page__ui-left">
+        <a class="ui-left__projects-btn" id="projects-btn" @click="toggleMenu"><span class="icon__plus"></span><h3>Projects</h3></a>   
+        </div> -->
         <div class="project-page__ui-right">
+         <!--  <div class="ui-right__logo">
+          <img src="../../assets/mode_sq_blk.svg">
+          </div> -->
         <a class="ui-right__projects-btn" id="projects-btn" @click="toggleMenu"><span class="icon__plus"></span><h3>Projects</h3></a>   
           <a href="#" id="info-btn" class="info__link"><h3>Info</h3></a>
           <ul id="social" class="social-icons">
@@ -48,22 +54,22 @@
         <div class="project-page__project-content">
           <div class="content__block" v-for="block in project.project_media_content">
             <div class="video__container" v-for="vimeo in block.vimeo">
-              <div class="video__container-inner">
-                <iframe :src="'https://player.vimeo.com/video/'+vimeo.id" frameborder='0' webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
-              </div>
               <div class="video__caption">
                 <h3>{{ vimeo.video_caption.caption_title }}</h3>
                 <p>{{ vimeo.video_caption.caption }}</p>
               </div>
+              <div class="video__container-inner">
+                <iframe :src="'https://player.vimeo.com/video/'+vimeo.id" frameborder='0' webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>
+              </div>
             </div>
             <div class="image__container" v-for="(contentImage, i) in block.image_content_group" :key="i">
+              <div class="image__caption" v-if="contentImage.image.image_class=='image__in-flow' && contentImage.image.image_caption">
+                <h3>{{ contentImage.image.image_caption.caption_title }}</h3>
+                <p>{{ contentImage.image.image_caption.caption }}</p>
+              </div>
               <div :class="contentImage.image.image_class"
                   v-if="contentImage.image.image_class=='image__in-flow'">
                 <img :src="contentImage.image.image_file">
-              </div>
-              <div class="image__caption" v-if="contentImage.image.image_class=='image__in-flow'">
-                <h3>{{ contentImage.image.image_caption.caption_title }}</h3>
-                <p>{{ contentImage.image.image_caption.caption }}</p>
               </div>
               <div  :class="contentImage.image.image_class" 
                     v-if="contentImage.image.image_class=='image__full-width'"
@@ -93,7 +99,8 @@ export default {
       contentLoaded: false,
       gridTracks: 8,
       transitioning: true,
-      showMenu: false
+      showMenu: false,
+      scrollPos: 0
     };
   },
   computed: {
@@ -247,7 +254,18 @@ export default {
       //this.$router.push("/");
     },
     toggleMenu() {
-      this.showMenu = !this.showMenu;
+      if(!this.showMenu) {
+        this.scrollPos = $(document).scrollTop();
+        console.log(this.scrollPos + ' scrollpos')
+        //$('body').css({top: this.scrollPos});
+        $('body').toggleClass("menu-open");
+        this.showMenu = !this.showMenu;
+      } else if (this.showMenu) {
+        $('body').toggleClass("menu-open");
+        this.showMenu = !this.showMenu;
+        $(document).scrollTop(this.scrollPos);
+      }
+      
     }
   },
   beforeCreate() {
@@ -281,11 +299,31 @@ export default {
 <style lang="scss">
 @import "../../style/_variables.scss";
 @import "../../style/mixins.scss";
+body.menu-open {
+    overflow: hidden;
+    position: absolute;
+    height: 100vh;
+}
+@mixin caption-styles() {
+  h3 {
+    text-transform: uppercase;
+    color: $mode_purple;
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    margin-top: 1.2rem;
+    line-height: 1.4;
+  }
+  p {
+    font-size: 0.9rem;
+    padding-top: 0.5rem;
+    letter-spacing: 1px;
+    line-height: 1.4;
+  }
+}
 
 .project-page__container {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
+  margin: 0;
   width: 100%;
   min-height: 100%;
   background: none;
@@ -326,7 +364,7 @@ export default {
     text-align: left;
     grid: {
       template-columns: repeat(16, 1fr);
-      template-rows: [header-start] 5rem [header-end intro-start] 65vh
+      template-rows: [header-start] 5rem [header-end intro-start] 70vh
         [intro-end project-content-start] auto [project-content-end
         footer-start] 14rem [footer-end];
     }
@@ -337,20 +375,74 @@ export default {
     color: $mode-text;
     background: none;
     &.menu {
-      height: 100vh;
+     //height: 100vh;
       overflow: hidden;
     }
     h3 {
       font-family: "Apercu-Medium";
     }
+    .project-page__ui-left {
+      position: fixed;
+      width: 10rem;
+      height: 100vh;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 100;
+      
+      .icon__plus {
+        &:before, &:after {
+          position: absolute;
+          left: 15px;
+          content: " ";
+          height: 13px;
+          width: 2px;
+          background-color: $mode-purple;
+        }
+        &:after {
+          transform: rotate(90deg);
+        }
+      }
+      .ui-left__projects-btn {
+        position: relative;
+        display: block;
+        width: 32px;
+        height: 32px;
+        margin-top: 2rem;
+        text-decoration: none;
+        opacity: 0.5;
+        user-select: none;
+        cursor: pointer;
+        h3 {
+          @include rotate-link();
+          margin-top: 2rem;
+        }
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
     .project-page__ui-right {
-      grid-column: -2/-1;
-      grid-row: 1/span 2;
+      position: fixed;
+      width: 10rem;
+      height: 94vh;
+      top: 0;
+      right: 0;
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
       align-items: center;
       z-index: 100;
+      /* .ui-right__logo {
+        width: 5rem;
+        height: auto;
+        img {
+          width: 100%;
+        }
+      } */
       .info__link {
         position: relative;
         text-decoration: none;
@@ -493,7 +585,7 @@ export default {
         }
       }
       #project-title {
-        grid-column: 1/-1;
+        grid-column: 1/-2;
         grid-row: title-start / title-end;
         display: grid;
         grid-template-columns: repeat(9, 1fr);
@@ -517,12 +609,12 @@ export default {
         }
       }
       .project-page__overview {
-        grid-column: 4/ -1;
+        grid-column: 4/ -2;
         grid-row: -2/-1;
         padding-top: 2rem;
         padding-right: 1rem;
         line-height: 2.2rem;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         letter-spacing: 1px;
       }
     }
@@ -544,10 +636,10 @@ export default {
           grid-column: 1/-1;
           display: grid;
           grid-template-columns: repeat(16, 1fr);
-          grid-row-gap: 4rem;
+          grid-row-gap: 2rem;
           
           .video__container-inner {
-            grid-column: 3/span 11;
+            grid-column: 4/span 10;
             position: relative;
             padding-bottom: 56.25%;
             height: 0;
@@ -562,8 +654,8 @@ export default {
             }
           }
           .video__caption {
-            grid-column: -4/span 2;
-            margin-left: 1.5rem;
+            grid-column: 3/span 4;
+            margin: 0;
             @include rule-above();
             @include caption-styles();
           }
@@ -572,9 +664,9 @@ export default {
           grid-column: 1/-1;
           display: grid;
           grid-template-columns: repeat(16, 1fr);
-          grid-row-gap: 4rem;
+          grid-row-gap: 2rem;
           .image__in-flow {
-            grid-column: 3/span 11;
+            grid-column: 4/span 10;
             @include content-shadow();
             img {
               width: 100%;
@@ -582,8 +674,8 @@ export default {
             }
           }
           .image__caption {
-            grid-column: -4/span 2;
-            margin-left: 1.5rem;
+            grid-column: 3/span 4;
+            margin: 0;
             @include rule-above();
             @include caption-styles();
           }

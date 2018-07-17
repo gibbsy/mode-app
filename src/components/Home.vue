@@ -1,19 +1,18 @@
 <template>
 <div class="home__inner-wrapper">
-  <transition name="fade" appear mode="out-in">
-<!--   <app-header></app-header>
- -->  </transition>
  <div class="home-page__ui-right">
    <div class="ui-right__logo"> 
-       <img src="../assets/mode_sq_b.png">
+       <img src="../assets/mode_sq_blk.svg">
     </div>
     <a href="#" id="info-btn" class="info__link"><h3>Info</h3></a>
     <social-icons></social-icons>
  </div>
   <div class="projects">
-  <preloader v-if="showPreloader"></preloader>  
     <transition name="fade" appear mode="out-in">
-      <div class="projects__grid" v-if="imagesLoaded">
+      <preloader v-if="showPreloader" v-on:preload-done="showLayout"></preloader>  
+    </transition>
+    <transition name="fade" appear mode="out-in">
+      <div class="projects__grid" v-if="showContent">
         <project-thumb 
           v-for="(project, index) in projects"
           :project="project" 
@@ -31,7 +30,7 @@
 import $ from "jquery";
 import Header from "./Header.vue";
 import ProjectThumb from "./projects/ProjectThumb.vue";
-import SocialIcons from './Shared/SocialIcons.vue';
+import SocialIcons from "./Shared/SocialIcons.vue";
 import Preloader from "./Shared/Preloader.vue";
 import { responsiveUtils } from "./Mixins/responsiveMixin";
 
@@ -75,6 +74,7 @@ export default {
       ],
       imagesLoaded: false,
       showPreloader: false,
+      introAniDone: false,
       imageURLs: []
     };
   }, //end data
@@ -90,6 +90,9 @@ export default {
     },
     dataLoaded() {
       return this.$store.getters.dataLoaded;
+    },
+    showContent() {
+      return this.imagesLoaded & this.introAniDone;
     }
   }, // end comp
   methods: {
@@ -157,7 +160,7 @@ export default {
         "complete",
         function() {
           this.imagesLoaded = true;
-          this.showPreloader = false;
+          //this.showPreloader = false;
         },
         this
       );
@@ -172,6 +175,21 @@ export default {
         });
         console.log("scroll");
       });
+    },
+    showLayout() {
+      const logo = $(".ui-right__logo img"),
+        info = $("#info-btn"),
+        social = $("#social"),
+        tl_intro = new TimelineMax({ delay: 0.25 })
+          .set(logo, { rotationY: -90, opacity: 0 })
+          .set(info, { y: "-=20px", opacity: 0 })
+          .set(social, { y: "-=20px", opacity: 0 })
+          .to(logo, 1, { rotationY: 0, opacity: 1, ease: Power2.easeOut }, 0)
+          .to(info, 1, { y: 0, opacity: 1, ease: Power2.easeOut }, 0.2)
+          .to(social, 1, { y: 0, opacity: 1, ease: Power2.easeOut }, 0.4);
+
+      this.showPreloader = false;
+      this.introAniDone = true;
     }
   },
   /* resizeListener() {
@@ -243,18 +261,20 @@ export default {
   align-items: center;
   justify-content: space-between;
   .ui-right__logo {
-    margin-top: 40px;
-    width: 100px;
+    margin-top: 4.5rem;
+    width: 5rem;
+    perspective: 200px;
     img {
       max-width: 100%;
+      opacity: 0;
     }
   }
   .info__link {
     position: relative;
     text-decoration: none;
-    margin-top: auto; 
+    margin-top: auto;
     margin-bottom: 2rem;
-    //opacity: 0;
+    opacity: 0;
     &:before {
       content: "";
       position: absolute;
@@ -269,6 +289,7 @@ export default {
     }
   }
   .social-icons {
+    opacity: 0;
     margin-bottom: 5rem;
   }
 }

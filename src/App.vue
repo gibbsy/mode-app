@@ -80,8 +80,8 @@ export default {
     //this.transitionName = toDepth < fromDepth ? 'slide-right' : 'slide-left'
     this.currentIndex = to.path;
     if(to.name == "Project" & from.name == "Home") {
-      this.transitionName = "slide-right";
-      this.transitionMode = "in-out";
+      this.transitionName = "fade";
+      this.transitionMode = "out-in";
     } else if (to.name == "Project" & from.name == "Project") {
       this.transitionName = "fade";
       this.transitionMode = "out-in";
@@ -123,6 +123,7 @@ body {
   padding: 0;
   background-color: $body-bg;
   width: 100%;
+  position: relative;
 }
 
 .view-toggle .header, .view-toggle .projects .projects__grid {

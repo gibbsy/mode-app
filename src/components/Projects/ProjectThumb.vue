@@ -58,7 +58,7 @@ export default {
   },
   methods: {
     showImmediately() {
-      let t = this.index*200,
+      let t = this.index*200 + 600,
       that = this;
       window.setTimeout(function(){
         that.showImage();

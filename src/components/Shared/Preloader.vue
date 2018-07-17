@@ -1,14 +1,41 @@
 <template>
   <div id="preloader">
-  <h1>LOADING</h1>
+    <image-sequence
+      directory="logo-reveal-black"
+      filename="reveal_blk_"
+      :numFrames="45"
+      format="png"
+      :doneFn="aniDone"
+    ></image-sequence>
   </div>
 </template>
 
 <script>
+import $ from 'jquery';
+import ImgSequence from './imgSequence';
 export default {
+  props: ["doneFn"],
+  components: {
+    imageSequence: ImgSequence
+  },
   data() {
     return {
       Prop : 1
+    }
+  },
+  methods: {
+    aniDone() {
+      const logo = $('.preloader--image-sequence img');
+      TweenMax.to(logo, 1, { 
+                rotationY: 90, 
+                opacity: 0.2, 
+                ease: Power2.easeIn, 
+                onComplete: () => {
+                  // tell parent we're done
+                  this.$emit('preload-done')
+                },
+                delay: 1
+              })
     }
   }
 }

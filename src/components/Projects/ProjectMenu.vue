@@ -26,12 +26,15 @@
 import $ from "jquery";
 
 export default {
+  props: {
+    scrollPos: Number
+  },
   data() {
     return {
       projects: {},
       hovered: 0,
       animating: false,
-      scrollPos: 0
+      mousePos: 0
     }
   },
   computed: {
@@ -64,19 +67,20 @@ export default {
     initScrollListener() {
       const container = $(".projects-menu__wrapper");
       const menu = $(".projects-menu__list");
-      const originTop = menu.offset().top;
+      const originTop = menu.position().top;
+      console.log('origin ' + originTop)
       const padding = 150;
-      container.mousemove(function(evt) {
+      
+      container.mousemove((evt) => {
         //console.log(evt.pageY);
         if(!this.animating) {
           this.animating = true;
-          let prevPos = this.scrollPos;
-          this.scrollPos = evt.pageY;
+          let prevPos = this.mousePos;
+          this.mousePos = evt.pageY - this.scrollPos;
           let scrollMax = menu.height() - (window.innerHeight - originTop);
-          let mouseRelative = this.scrollPos/window.innerHeight;
+          let mouseRelative = this.mousePos/window.innerHeight;
           let moveTo = -scrollMax*mouseRelative-padding;
-
-          let diffY = (this.scrollPos-prevPos)/scrollMax;
+          let diffY = (this.mousePos-prevPos)/scrollMax;
           //let limitY = Math.min(Math.max(limitY, 0), 20);
           diffY = diffY > 0.15 ? 0.15 : diffY < -0.15 ? -0.15 : diffY;
           let scaleY = 1 + diffY;
@@ -85,8 +89,8 @@ export default {
           TweenMax.to(menu, 1.2, {y: moveTo, scaleY: scaleY, ease: Power2.easeOut});
           let that = this;
           $('.projects-menu__list-item').each(function(i) {
-            let yPos = $(this).offset().top;
-            let pushRight = Math.abs(that.scrollPos-yPos)*0.1;
+            let yPos = $(this).position().top;
+            let pushRight = Math.abs(that.mousePos-yPos)*0.1;
             let fade = 1-(pushRight*0.01);
             TweenMax.to(this, 1.2, {x: pushRight, opacity: fade, ease: Power2.easeOut})
           })
@@ -111,6 +115,7 @@ export default {
     clickFn(index) {
       let goTo = this.projects[index].slug;
       this.$store.dispatch('setCurrent', index);
+      $('body').removeClass("menu-open");
       this.$nextTick(function(){
         this.$router.push("/project/" + goTo);
       });
@@ -148,10 +153,13 @@ export default {
   z-index: 100;
   overflow: hidden;
   .projects-menu__list {
-    grid-column: 7/-2;
+    /* grid-column: 7/-2;
     grid-row: 1 / span 3;
+    margin-top: 30rem; */
+    position: absolute;
+    top: 50vh;
+    left: 50vh;
     z-index: 110;
-    margin-top: 30rem;
     li {
       list-style: none;
       h1 {
@@ -169,7 +177,7 @@ export default {
   }
   .hover-image__wrapper {
     position: relative;
-    grid-column: 1 /span 8;
+    grid-column: 1 /span 7;
     grid-row: 2/span 1;
     .hover-image {
       position: absolute;
