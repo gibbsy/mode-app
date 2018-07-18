@@ -21,7 +21,8 @@ export default {
   data() {
     return {
       urls: [],
-      progress: "Initializing",
+      framesLoaded: 0,
+      progress: 0,
       ready: false,
       currentSrc: "",
       fps: 30,
@@ -49,6 +50,9 @@ export default {
         },
         this
       );
+      queue.on("fileload", function() {
+        this.fileLoaded();
+      }, this)
 
       queue.loadManifest(this.urls);
 
@@ -59,9 +63,17 @@ export default {
     loaded() {
       this.currentSrc = this.urls[this.currentFrame];
       this.ready = true;
-      this.$nextTick(() => {
-        this.animate();
-      });
+      setTimeout(() => {
+        this.$emit('loaded-frames');
+        this.$nextTick(() => {
+          this.animate();
+        });
+      }, 500);
+    },
+    fileLoaded() {
+      this.framesLoaded += 1;
+      this.progress = this.framesLoaded/this.numFrames;
+      this.$emit('update-progress', this.progress);
     },
     animate() {
       let currentTime = this.getTime(),

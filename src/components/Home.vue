@@ -9,7 +9,7 @@
  </div>
   <div class="projects">
     <transition name="fade" appear mode="out-in">
-      <preloader v-if="showPreloader" v-on:preload-done="showLayout"></preloader>  
+      <intro-ani v-if="showIntro" v-on:preload-done="introAniDone = true"></intro-ani>  
     </transition>
     <transition name="fade" appear mode="out-in">
       <div class="projects__grid" v-if="showContent">
@@ -31,7 +31,7 @@ import $ from "jquery";
 import Header from "./Header.vue";
 import ProjectThumb from "./projects/ProjectThumb.vue";
 import SocialIcons from "./Shared/SocialIcons.vue";
-import Preloader from "./Shared/Preloader.vue";
+import IntroAni from "./Shared/IntroAni.vue";
 import { responsiveUtils } from "./Mixins/responsiveMixin";
 
 export default {
@@ -73,7 +73,7 @@ export default {
         "x-wide"
       ],
       imagesLoaded: false,
-      showPreloader: false,
+      showIntro: false,
       introAniDone: false,
       imageURLs: []
     };
@@ -160,7 +160,6 @@ export default {
         "complete",
         function() {
           this.imagesLoaded = true;
-          //this.showPreloader = false;
         },
         this
       );
@@ -188,8 +187,7 @@ export default {
           .to(info, 1, { y: 0, opacity: 1, ease: Power2.easeOut }, 0.2)
           .to(social, 1, { y: 0, opacity: 1, ease: Power2.easeOut }, 0.4);
 
-      this.showPreloader = false;
-      this.introAniDone = true;
+      this.showIntro = false;
     }
   },
   /* resizeListener() {
@@ -212,7 +210,7 @@ export default {
     } else {
       // watcher will decide when it's ready
       //show preloader
-      this.showPreloader = true;
+      this.showIntro = true;
     }
   },
   mounted() {
@@ -221,11 +219,16 @@ export default {
   watch: {
     dataLoaded: function(val) {
       if (val) {
-        console.log(val);
+        //console.log(val);
         this.layoutSize = this.$store.getters.layoutSize;
         this.$nextTick(function() {
           this.buildImageURLs();
         });
+      }
+    },
+    showContent: function(val) {
+      if (val===true) {
+        this.showLayout();
       }
     }
   }
