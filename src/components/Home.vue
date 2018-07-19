@@ -1,16 +1,16 @@
 <template>
 <div class="home__inner-wrapper">
- <div class="home-page__ui-right">
+   <transition name="fade">
+      <div class="home__progress-bar progress-bar" v-if="imagesLoaded==false"></div>
+      </transition>
+ <div class="home__ui-right">
    <div class="ui-right__logo"> 
        <img src="../assets/mode_sq_blk.svg">
     </div>
-    <a href="#" id="info-btn" class="info__link"><h3>Info</h3></a>
+    <router-link href="#" id="info-btn" class="info__link" to="/info"><h3>Info</h3></router-link>
     <social-icons></social-icons>
  </div>
   <div class="projects">
-    <transition name="fade" appear mode="out-in">
-      <intro-ani v-if="showIntro" v-on:preload-done="introAniDone = true"></intro-ani>  
-    </transition>
     <transition name="fade" appear mode="out-in">
       <div class="projects__grid" v-if="showContent">
         <project-thumb 
@@ -27,25 +27,24 @@
 </div>
 </template>
 <script>
+import { mapGetters } from "vuex";
 import $ from "jquery";
-import Header from "./Header.vue";
-import ProjectThumb from "./projects/ProjectThumb.vue";
+import ProjectThumb from "./Projects/ProjectThumb.vue";
 import SocialIcons from "./Shared/SocialIcons.vue";
-import IntroAni from "./Shared/IntroAni.vue";
 import { responsiveUtils } from "./Mixins/responsiveMixin";
 
 export default {
   mixins: [responsiveUtils],
   components: {
-    appHeader: Header,
     projectThumb: ProjectThumb,
-    preloader: Preloader,
     socialIcons: SocialIcons
   },
   data() {
     return {
       layoutSize: null,
       resizing: false,
+      contentOn: false,
+      imagesLoadedCount: 0,
       gridLayoutLrg: [
         "x-wide",
         "wide",
@@ -72,13 +71,14 @@ export default {
         "wide",
         "x-wide"
       ],
-      imagesLoaded: false,
-      showIntro: false,
-      introAniDone: false,
       imageURLs: []
     };
-  }, //end data
+  },
   computed: {
+    ...mapGetters({
+      imagesLoaded: "homeImagesLoaded",
+      introComplete: "introViewed"
+    }),
     projects() {
       return this.$store.getters.projects;
     },
@@ -92,9 +92,9 @@ export default {
       return this.$store.getters.dataLoaded;
     },
     showContent() {
-      return this.imagesLoaded & this.introAniDone;
+      return this.imagesLoaded && this.introComplete;
     }
-  }, // end comp
+  },
   methods: {
     buildImageURLs() {
       //console.log(this.projects);
@@ -159,12 +159,23 @@ export default {
       queue.on(
         "complete",
         function() {
-          this.imagesLoaded = true;
-        },
-        this
-      );
-
+          //this.imagesLoaded = true;
+          setTimeout(() => {
+            this.$store.commit("HOME_IMAGES_LOADED");
+          }, 200);
+          console.log("images loaded");
+        }, this);
+      queue.on("fileload",this.updateProgress, this);
       queue.loadManifest(this.imageURLs);
+    },
+    updateProgress(event) {
+      const bar = $('.home__progress-bar');
+      const progress = ++this.imagesLoadedCount/this.featuredImages.length;
+      const item = event.item; 
+      const type = item.type;
+      //console.log(item);
+      //console.log(type);
+      TweenMax.to(bar, 0.2, { scaleX: progress })
     },
     scrollListener() {
       $(window).scroll(function() {
@@ -175,19 +186,19 @@ export default {
         console.log("scroll");
       });
     },
-    showLayout() {
+    showLayout(delay) {
       const logo = $(".ui-right__logo img"),
         info = $("#info-btn"),
         social = $("#social"),
-        tl_intro = new TimelineMax({ delay: 0.25 })
+        tl_intro = new TimelineMax({ delay: delay, onComplete: () => {
+          this.contentOn = true;
+        } })
           .set(logo, { rotationY: -90, opacity: 0 })
           .set(info, { y: "-=20px", opacity: 0 })
           .set(social, { y: "-=20px", opacity: 0 })
           .to(logo, 1, { rotationY: 0, opacity: 1, ease: Power2.easeOut }, 0)
           .to(info, 1, { y: 0, opacity: 1, ease: Power2.easeOut }, 0.2)
           .to(social, 1, { y: 0, opacity: 1, ease: Power2.easeOut }, 0.4);
-
-      this.showIntro = false;
     }
   },
   /* resizeListener() {
@@ -203,23 +214,21 @@ export default {
   }, */
   created() {
     this.layoutSize = this.$store.getters.layoutSize;
-    console.log(this.layoutSize);
-    if (this.$store.getters.dataLoaded) {
-      // data exists in store -- been here before
-      this.buildImageURLs();
-    } else {
-      // watcher will decide when it's ready
-      //show preloader
-      this.showIntro = true;
-    }
   },
   mounted() {
-    //this.scrollListener();
+    //console.log('show ' + this.showContent)
+    if (this.showContent==true && this.contentOn==false) {
+      this.showLayout(0.25);
+    } else if ( this.dataLoaded && this.layoutSize ) {
+      // data already loaded must have come via deeplink
+      // load the homepage content
+      this.buildImageURLs();
+    }
   },
   watch: {
     dataLoaded: function(val) {
       if (val) {
-        //console.log(val);
+        console.log('val ' + val);
         this.layoutSize = this.$store.getters.layoutSize;
         this.$nextTick(function() {
           this.buildImageURLs();
@@ -227,8 +236,9 @@ export default {
       }
     },
     showContent: function(val) {
-      if (val===true) {
-        this.showLayout();
+      console.log("watcher" + val);
+      if (val && this.contentOn === false) {
+        this.showLayout(0.5);
       }
     }
   }
@@ -253,7 +263,7 @@ export default {
   }
 }
 
-.home-page__ui-right {
+.home__ui-right {
   position: fixed;
   width: 14rem;
   height: 100vh;

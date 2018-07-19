@@ -1,5 +1,8 @@
 <template>
   <div id="app">
+    <div class="about-page__reveal">
+      <div id="reveal-1"></div><div id="reveal-2"></div>
+    </div>
     <transition 
       appear
       :name="transitionName" 
@@ -8,7 +11,12 @@
     >
     <router-view :key="currentIndex"></router-view>
   </transition>
-    <!-- <project-menu></project-menu> -->
+  <app-intro 
+        v-if="introViewed === false" 
+        :parent-ready="routeImagesLoaded"
+        v-on:intro-complete="introComplete"
+        >
+  </app-intro>
   </div>
 </template>
 
@@ -18,10 +26,14 @@ import { mapGetters } from 'vuex';
 import $ from 'jquery';
 import 'yuki-createjs/lib/preloadjs-0.6.2.combined';
 import { responsiveUtils } from './components/Mixins/responsiveMixin';
+import AppIntro from "./components/Intro/AppIntro.vue";
 
 export default {
   name: 'app',
   mixins: [ responsiveUtils ],
+  components: {
+    appIntro: AppIntro
+  },
   data() {
     return {
       ticking: false,
@@ -30,6 +42,40 @@ export default {
       transitionDuration: 500,
       currentIndex: ''
     }
+  },
+  computed: {
+    ...mapGetters([
+      'introViewed',
+      'dataLoaded',
+      'homeImagesLoaded',
+      'projectImagesLoaded',
+      'currentProject'
+    ]),
+    routeImagesLoaded() {
+     if(this.currentIndex == 'Home') {
+       return this.homeImagesLoaded;
+     } else if (this.currentIndex =='Project') {
+       return this.projectImagesLoaded;
+     } else {
+       console.log('Unknown Index')
+       return false;
+     }
+    }
+  },
+  created() {
+    this.setVWidth();
+    this.setVHeight();
+    this.currentIndex = this.$route.name;
+    //console.log(this.$route.name)
+
+    Vue.http
+      .get('projects?per_page=30')
+      .then(response => response.json())
+      .then(data => {
+          this.$store.dispatch('setProjects', data);
+          //console.log(data)
+    });
+
   },
   methods: {
     onScroll() {
@@ -51,26 +97,10 @@ export default {
     },
     scrollInit() {
       window.addEventListener('scroll', this.onScroll);
+    },
+    introComplete() {
+      this.$store.commit('INTRO_VIEWED');
     }
-  },
-  computed: {
-    ...mapGetters([
-      'projectView',
-      'currentProject'
-    ])
-  },
-  created() {
-    this.setVWidth();
-    this.setVHeight();
-    this.currentIndex = 'home';
-    Vue.http
-      .get('projects?per_page=30')
-      .then(response => response.json())
-      .then(data => {
-          this.$store.dispatch('setProjects', data);
-          console.log(data)
-    });
-
   },
   mounted() {
     this.scrollInit();
@@ -87,11 +117,11 @@ export default {
       this.transitionMode = "out-in";
       this.transitionDuration = 300;
     } else {
-      this.transitionName = "";
+      this.transitionName = "fade";
       this.transitionMode = "out-in";
     }
-    console.log(to.name)
-    console.log(from.name)
+    //console.log(to.name)
+    //console.log(from.name)
   }
 }
 }
@@ -124,6 +154,16 @@ body {
   background-color: $body-bg;
   width: 100%;
   position: relative;
+  .progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: #000;
+    transform-origin: 0 0;
+    transform: scaleX(0);
+  }
 }
 
 .view-toggle .header, .view-toggle .projects .projects__grid {

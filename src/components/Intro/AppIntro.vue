@@ -1,55 +1,70 @@
 <template>
-  <div id="preloader">
-    <div class="progress-bar" v-if="loadingFrames"></div>
+  <div id="intro">
+    <transition name="fade">
+      <div class="intro__progress-bar progress-bar" v-if="loadingFrames"></div>
+    </transition>
     <image-sequence
       directory="logo-reveal-black"
       filename="reveal_blk_"
       :numFrames="45"
       format="png"
-      :doneFn="aniDone"
       v-on:update-progress="updateProgress($event)"
       v-on:loaded-frames="loadingFrames = false"
+      v-on:animation-done="aniDone = true"
     ></image-sequence>
   </div>
 </template>
 
 <script>
 import $ from 'jquery';
-import ImgSequence from './imgSequence';
+import ImgSequenceIntro from './imgSequenceIntro';
 export default {
-  props: ["doneFn"],
+  props: ['parentReady'],
   components: {
-    imageSequence: ImgSequence
+    imageSequence: ImgSequenceIntro
   },
   data() {
     return {
-      loadingFrames: true
+      loadingFrames: true,
+      aniDone: false
+    }
+  },
+  computed: {
+    appReady() {
+      return this.aniDone & this.parentReady;
     }
   },
   methods: {
-    aniDone() {
-      const logo = $('.preloader--image-sequence img');
+    animateOut() {
+      const logo = $('.intro__image-sequence img');
       TweenMax.to(logo, 1, { 
                 rotationY: 90, 
                 opacity: 0.2, 
                 ease: Power2.easeIn, 
                 onComplete: () => {
                   // tell parent we're done
-                  this.$emit('preload-done')
+                  this.$emit('intro-complete')
                 },
                 delay: 1
               })
     },
     updateProgress(progress) {
-      const bar = $('.progress-bar');
+      const bar = $('.intro__progress-bar');
       TweenMax.to(bar, 0.2, { scaleX: progress })
+    }
+  },
+  watch: {
+    appReady: function(val) {
+      if (val) {
+        this.animateOut();
+      }
     }
   }
 }
 </script>
 
 <style lang="scss">
-#preloader {
+#intro {
   position: fixed;
   top: 0;
   left: 0;
@@ -60,15 +75,5 @@ export default {
   height: 100%;
   background: #fff;
   z-index: 1000;
-  .progress-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background-color: #000;
-    transform-origin: 0 0;
-    transform: scaleX(0);
-  }
 }
 </style>

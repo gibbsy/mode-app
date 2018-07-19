@@ -1,7 +1,9 @@
 const state = {
     projects: null,
     dataLoaded: false,
-    intro: true,
+    homeImagesLoaded: false,
+    projectImagesLoaded: false,
+    introViewed: false,
     featuredImages: [],
     currentProject: {},
     currentIndex: -1
@@ -19,12 +21,18 @@ const mutations = {
         }
         state.featuredImages = imgs;
     },
+    'HOME_IMAGES_LOADED'(state) {
+        state.homeImagesLoaded = true;
+    },
+    'PROJECT_IMAGES_LOADED'(state) {
+        state.projectImagesLoaded = true;
+    },
     'SET_CURRENT'(state, index) {
         state.currentProject = state.projects[index];
         state.currentIndex = index;
     },
-    'INTRO_DONE'(state) {
-        state.intro = false;
+    'INTRO_VIEWED'(state) {
+        state.introViewed = true;
     }
 };
 
@@ -36,8 +44,8 @@ const actions = {
     setCurrent({ commit }, selectedIndex) {
         commit('SET_CURRENT', selectedIndex);
     },
-    setIntroDone({ commit }) {
-        commit('INTRO_DONE');
+    introViewed({ commit }) {
+        commit('INTRO_VIEWED');
     }
 };
 
@@ -54,8 +62,14 @@ const getters = {
     dataLoaded: state => {
         return state.dataLoaded;
     },
-    isIntro: state => {
-        return state.intro;
+    homeImagesLoaded: state => {
+        return state.homeImagesLoaded;
+    },
+    introViewed: state => {
+        return state.introViewed;
+    },
+    projectImagesLoaded: state => {
+        return state.projectImagesLoaded;
     },
     currentIndex: state => {
         return state.currentIndex;

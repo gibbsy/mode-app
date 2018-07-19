@@ -1,5 +1,5 @@
 <template>
-  <div class="preloader--image-sequence">
+  <div class="intro__image-sequence">
     <img :src="currentSrc" v-if="ready"/>
   </div>
 </template>
@@ -94,7 +94,8 @@ export default {
           this.currentSrc = this.urls[frameNum];
         } else {
           window.cancelAnimationFrame(this.requestAni);
-          this.doneFn();
+          this.$emit('animation-done');
+          console.log('done ani')
         }
         currentTime = time;
       }; 
@@ -143,7 +144,7 @@ export default {
 </script>
 
 <style lang="scss">
-.preloader--image-sequence {
+.intro__image-sequence {
   text-align: center !important;
   display: block;
   max-width: 100%;

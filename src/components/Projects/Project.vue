@@ -1,15 +1,15 @@
 <template>
     <section :id="project.slug+'-full'" class="project-page__container">
-      <div class="project-page__reveal" v-if="transitioning">
-      <div id="reveal-1"></div><div id="reveal-2"></div>
-    </div>
-    <!-- <div class="grid-background__fixed" v-if="contentLoaded">
-      <span v-for="track in gridTracks" :key="track"></span>
-    </div> -->
+      <transition name="fade">
+        <div class="project__progress-bar progress-bar" v-if="contentLoaded==false"></div>
+      </transition>
     <transition name="fade" appear mode="in-out">
       <project-menu v-if="showMenu" :key="$route.params.slug" :scrollPos="scrollPos"></project-menu>
     </transition>
       <div class="project-page__grid-wrapper" v-if="contentLoaded" :class="{menu: showMenu}">
+        <div class="project-page__back-button">
+          <router-link to="/" class="back-arrow"></router-link>
+        </div>
        <!--  <div class="project-page__ui-left">
         <a class="ui-left__projects-btn" id="projects-btn" @click="toggleMenu"><span class="icon__plus"></span><h3>Projects</h3></a>   
         </div> -->
@@ -18,7 +18,7 @@
           <img src="../../assets/mode_sq_blk.svg">
           </div> -->
         <a class="ui-right__projects-btn" id="projects-btn" @click="toggleMenu"><span class="icon__plus"></span><h3>Projects</h3></a>   
-          <a href="#" id="info-btn" class="info__link"><h3>Info</h3></a>
+          <router-link href="#" id="info-btn" class="info__link" to="/info"><h3>Info</h3></router-link>
           <ul id="social" class="social-icons">
             <li id="twitter"></li>
             <li id="linkedin"></li>
@@ -84,6 +84,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import { TimelineMax } from "gsap";
 import $ from 'jquery';
 import ProjectMenu from "./ProjectMenu";
@@ -95,15 +96,23 @@ export default {
   data() {
     return {
       project: {},
-      imageUrls: [],
       contentLoaded: false,
+      queueLength: 1,
+      imagesLoaded: 0,
+      contentImages: [],
       gridTracks: 8,
       transitioning: true,
       showMenu: false,
+      contentOn: false,
       scrollPos: 0
     };
   },
   computed: {
+    ...mapGetters([
+      'dataLoaded',
+      'introViewed',
+      'projects'
+    ]),
     heroImg() {
       return {
         background:
@@ -111,10 +120,13 @@ export default {
           this.project.hero.image +
           '") no-repeat center/cover'
       }
+    },
+    showContent() {
+      return this.contentLoaded && this.introViewed;
     }
   },
   methods: {
-    transitionIn() {
+    /* transitionIn() {
       console.log("transition");
       const that = this;
       const reveal1 = document.getElementById("reveal-1"),
@@ -125,9 +137,9 @@ export default {
         .set(reveal1, { x: "-=100%" })
         .to(reveal2, 0.5, { x: "+=100%", ease: Power1.easeIn }, 0.3)
         .to(reveal1, 0.5, { x: "+=100%", ease: Power1.easeIn }, 0.5);
-    },
-    revealContent() {
-      const that = this;
+    }, */
+    revealContent(delay) {
+      const wait = delay || 0.5;
       const reveal1 = document.getElementById("reveal-1"),
             reveal2 = document.getElementById("reveal-2"),
             tags1 = $("#tags-roles"),
@@ -164,9 +176,7 @@ export default {
         .set(vimeo, { clearProps:"opacity" })
         .set(behance, { clearProps:"opacity" })
 
-        let tl_reveal = new TimelineMax({delay: 0.5, onComplete: function() {
-          that.transitioning = false;
-        }})
+        let tl_reveal = new TimelineMax({delay: wait})
         .set(tags1, { x: "+=50px", opacity: 0 })
         .set(tags2, { x: "+=50px", opacity: 0 })
         .set(tags3, { x: "+=50px", opacity: 0 })
@@ -185,63 +195,71 @@ export default {
         .add(tl_rightNav, 1)
         .to(title, 1, { opacity: 1, y: 0, ease: Power2.easeOut }, 1)
         .to(subtitle, 1, { opacity: 1, y: 0, ease: Power2.easeOut }, 1.1)
-        .to(intro, 1, { opacity: 1, y: 0, ease: Power2.easeOut }, 1.2)
+        .to(intro, 1, { opacity: 1, y: 0, ease: Power2.easeOut }, 1.2);
 
+        this.contentOn = true;
+
+    },
+    extractImages() {
+      this.contentImages = this.project.project_media_content.map(obj => ({
+        imageGroups: obj.image_content_group
+      }));
+      for (let o of this.contentImages) {
+        for (let i=0; i< o.imageGroups.length; i++) {
+          this.queueLength++;
+          console.log(this.queueLength)
+        }
+      }
+      this.loadHero();
     },
     loadHero() {
       const queue = new createjs.LoadQueue();
       queue.on("complete", function() {
         console.log('hero loaded');
+        this.imagesLoaded = 1;
         this.loadContent();
       }, this);
       let hero = 'static/heroes-assets/large/' + this.project.hero.image;
       queue.loadFile(hero);
     },
     loadContent() {
-      //this.$store.dispatch('setProjectView', true);
       const queue = new createjs.LoadQueue();
       const that = this;
       queue.on("complete", function() {
-        console.log('finished loading');
-        this.contentLoaded = true;
-        console.log('reveal')
-        this.$nextTick(function() {
-          that.revealContent();
-        })
+       this.$store.commit('PROJECT_IMAGES_LOADED');
       }, this);
-      queue.on("fileload", this.handleFileLoad, this);
-
-      const contentImages = this.project.project_media_content.map(obj => ({
-        imageGroups: obj.image_content_group
-      }));
-      console.log(contentImages[0].imageGroups);
-      if(contentImages) {
-        for (let o of contentImages) {
+      queue.on("fileload",this.updateProgress, this);
+      //console.log(contentImages[0].imageGroups);
+      if(this.contentImages) {
+        for (let o of this.contentImages) {
           for (let i=0; i< o.imageGroups.length; i++) {
             //console.log(o.imageGroups[i].image);
             let url = o.imageGroups[i].image.image_file;
             let l = new createjs.LoadItem().set({src:url, crossOrigin:"http://localhost:8080"});
             queue.loadFile(l);
-            console.log("loading" + url)
+            //console.log("loading" + url)
           }
         }
       } else {
         console.log('no images to load');
         this.contentLoaded = true;
-        this.$nextTick(function() {
-          this.revealContent();
-        })
       }
     },
-    handleFileLoad(event) {
-     var item = event.item; 
-     var type = item.type;
-      console.log(item);
-      console.log(type);
+    updateProgress(event) {
+      const bar = $('.project__progress-bar');
+      const progress = ++this.imagesLoaded/this.queueLength;
+      const item = event.item; 
+      const type = item.type;
+      //console.log(item);
+      //console.log(type);
+      TweenMax.to(bar, 0.2, { scaleX: progress, onComplete: this.checkProgress })
     },
-    beforeLeave() {
-      console.log("homeView");
-      this.$store.dispatch("setProjectView", false);
+    checkProgress() {
+      if(this.imagesLoaded === this.queueLength) {
+        console.log('finished loading');
+        this.contentLoaded = true;
+        console.log('reveal')
+      }
     },
     introAni() {
       let reveal = document.querySelectorAll(".project-page__reveal");
@@ -249,9 +267,6 @@ export default {
         x: "-=100%",
         ease: Power4.easeInOut
       });
-    },
-    closeFn() {
-      //this.$router.push("/");
     },
     toggleMenu() {
       if(!this.showMenu) {
@@ -265,32 +280,42 @@ export default {
         this.showMenu = !this.showMenu;
         $(document).scrollTop(this.scrollPos);
       }
-      
-    }
-  },
-  beforeCreate() {
-    if (!this.$store.getters.dataLoaded) {
-      console.log("redirect");
-      this.$router.push("/");
     }
   },
   created() {
-    // handle a deep link - redirect to home?
     if (this.$store.getters.dataLoaded) {
-      //console.log(this.$route.params.slug);
       this.project = this.$store.getters.currentProject;
-      this.isLoaded = true;
     }
   },
   mounted() {
-    //console.log(this.project);
-    if (this.project && this.isLoaded) {
+    if (this.project && this.dataLoaded) {
       this.$nextTick(function() {
-        this.transitionIn();
+        this.extractImages();
       });
     } else {
-      // load data and wait
-      console.log("no data");
+      this.deepLink = true;
+      console.log("deeplink - wait for data");
+    }
+  },
+  watch: {
+    dataLoaded: function(val) {
+      if (val == true && this.deepLink == true) {
+        // get the slug from $route
+        // find the index and set current project
+        // then load
+        const slug = this.$route.params.slug;
+        const selectedIndex = this.projects.findIndex( el => el.slug == slug );
+        this.$store.dispatch('setCurrent', selectedIndex);
+        this.project = this.projects[selectedIndex];
+        this.$nextTick(function() {
+          this.extractImages();
+        });
+      }
+    },
+    showContent: function(val) {
+      if (val && this.contentOn === false) {
+        this.$nextTick(this.revealContent);
+      }
     }
   }
 };
@@ -325,7 +350,7 @@ body.menu-open {
   position: relative;
   margin: 0;
   width: 100%;
-  min-height: 100%;
+  min-height: 100vh;
   background: none;
   z-index: 100;
   overflow-x: hidden;
@@ -380,6 +405,21 @@ body.menu-open {
     }
     h3 {
       font-family: "Apercu-Medium";
+    }
+    .project-page__back-button {
+      position: relative;
+      grid-column: 1/span 1;
+      grid-row: 1/span 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .back-arrow {
+        position: relative;
+        display: block;
+        width: 28px;
+        height: 12px;
+        background: url('../../assets/back_arrow.svg') no-repeat left top/ 100% 100%;
+      }
     }
     .project-page__ui-left {
       position: fixed;
@@ -486,7 +526,7 @@ body.menu-open {
         cursor: pointer;
         h3 {
           @include rotate-link();
-          margin-top: 2rem;
+          margin-top: 2.1rem;
         }
         &:hover {
           opacity: 1;
