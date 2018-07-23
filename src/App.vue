@@ -1,25 +1,18 @@
 <template>
   <div id="app">
-    <div class="about-page__reveal">
-      <div id="reveal-1"></div><div id="reveal-2"></div>
-    </div>
-    <transition 
-      appear
-      :name="transitionName" 
-      :duration="transitionDuration" 
-      :mode="transitionMode"
-    >
-    <router-view :key="currentIndex"></router-view>
+    <page-transition>
+    <router-view :key="routeKey"></router-view>
+  </page-transition>
+  <transition name="fade" mode="out-in">
+    <app-intro 
+          v-if="introViewed === false" 
+          :parent-ready="routeImagesLoaded"
+          v-on:intro-complete="introComplete"
+          >
+    </app-intro>
   </transition>
-  <app-intro 
-        v-if="introViewed === false" 
-        :parent-ready="routeImagesLoaded"
-        v-on:intro-complete="introComplete"
-        >
-  </app-intro>
   </div>
 </template>
-
 <script>
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
@@ -27,24 +20,24 @@ import $ from 'jquery';
 import 'yuki-createjs/lib/preloadjs-0.6.2.combined';
 import { responsiveUtils } from './components/Mixins/responsiveMixin';
 import AppIntro from "./components/Intro/AppIntro.vue";
+import PageTransition from "./components/Shared/PageTransition.vue";
 
 export default {
   name: 'app',
   mixins: [ responsiveUtils ],
   components: {
-    appIntro: AppIntro
+    appIntro: AppIntro,
+    pageTransition: PageTransition
   },
   data() {
     return {
       ticking: false,
-      transitionName: '',
-      transitionMode: 'out-in',
-      transitionDuration: 500,
       currentIndex: ''
     }
   },
   computed: {
     ...mapGetters([
+      'scrollPos',
       'introViewed',
       'dataLoaded',
       'homeImagesLoaded',
@@ -56,10 +49,16 @@ export default {
        return this.homeImagesLoaded;
      } else if (this.currentIndex =='Project') {
        return this.projectImagesLoaded;
+     } else if (this.currentIndex =='Info') {
+       return true;
      } else {
-       console.log('Unknown Index')
+       console.log('Unknown Index');
+       this.$router.push("/")
        return false;
      }
+    },
+    routeKey() {
+      return this.currentProject.slug || this.currentIndex;
     }
   },
   created() {
@@ -84,9 +83,9 @@ export default {
     },
     requestTick() {
       if (!this.ticking) {
-            var self = this;
-            window.requestAnimationFrame(function() {
-              self.updateScroll();   
+          //  var self = this;
+            window.requestAnimationFrame(() => {
+              this.updateScroll();   
             });
           }
       this.ticking = true;
@@ -94,6 +93,7 @@ export default {
     updateScroll() {
       this.ticking = false;
       let currentScrollY = this.$store.getters.scrollPos;
+      //console.log(this.scrollPos);
     },
     scrollInit() {
       window.addEventListener('scroll', this.onScroll);
@@ -104,26 +104,7 @@ export default {
   },
   mounted() {
     this.scrollInit();
-  },
-  watch: {
-  '$route' (to, from) {
-    //this.transitionName = toDepth < fromDepth ? 'slide-right' : 'slide-left'
-    this.currentIndex = to.path;
-    if(to.name == "Project" & from.name == "Home") {
-      this.transitionName = "fade";
-      this.transitionMode = "out-in";
-    } else if (to.name == "Project" & from.name == "Project") {
-      this.transitionName = "fade";
-      this.transitionMode = "out-in";
-      this.transitionDuration = 300;
-    } else {
-      this.transitionName = "fade";
-      this.transitionMode = "out-in";
-    }
-    //console.log(to.name)
-    //console.log(from.name)
   }
-}
 }
 </script>
 
@@ -144,6 +125,12 @@ body {
   background-color: $body-bg;
 }
 
+body.transitioning {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 #app {
   font-family: 'Apercu', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -160,7 +147,7 @@ body {
     left: 0;
     width: 100%;
     height: 4px;
-    background-color: #000;
+    background-color: #111;
     transform-origin: 0 0;
     transform: scaleX(0);
   }
@@ -168,49 +155,6 @@ body {
 
 .view-toggle .header, .view-toggle .projects .projects__grid {
   display: none;
-}
-
-.slide-fade-enter-active {
-  transition: all 1s ease-out;
-}
-.slide-fade-leave-active {
-  transition: all .3s ease-out;
-}
-.slide-fade-enter
-/* .slide-fade-leave-active for <2.1.8 */ {
-  transform: translateY(50px);
-  opacity: 0;
-}
-.slide-fade-leave-to
-/* .slide-fade-leave-active for <2.1.8 */ {
-  transform: translateY(10px);
-  opacity: 0;
-}
-
-.fade-enter-active {
-  transition: all .5s ease;
-}
-.fade-leave-active {
-  transition: all .2s ease;
-}
-.fade-enter, .fade-leave-to
-/* .slide-fade-leave-active for <2.1.8 */ {
-  opacity: 0;
-}
-
-.slide-right-enter-active {
-  transition: all 0.5s ease;
-}
-.slide-right-leave-active {
-  transition: all 0.5s ease;
-}
-.slide-right-enter
-/* .slide-right-leave-active for <2.1.8 */ {
-  transform: translateX(-100px);
-}
-.slide-right-leave-to
-/* .slide-right-leave-active for <2.1.8 */ {
-  transform: translateX(0);
 }
 
 </style>

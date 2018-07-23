@@ -5,6 +5,7 @@ import VueResource from 'vue-resource';
 
 import router from './router';
 import store from './store/store';
+import typewriter from './directives/typewriter';
 
 //Vue.config.productionTip = false
 

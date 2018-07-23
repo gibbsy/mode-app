@@ -1,5 +1,5 @@
 <template>
-  <div id="intro">
+  <div class="intro__container">
     <transition name="fade">
       <div class="intro__progress-bar progress-bar" v-if="loadingFrames"></div>
     </transition>
@@ -64,7 +64,7 @@ export default {
 </script>
 
 <style lang="scss">
-#intro {
+.intro__container {
   position: fixed;
   top: 0;
   left: 0;

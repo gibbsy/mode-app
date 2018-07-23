@@ -1,5 +1,5 @@
 <template>
-<div class="home__inner-wrapper">
+<div class="home__container">
    <transition name="fade">
       <div class="home__progress-bar progress-bar" v-if="imagesLoaded==false"></div>
       </transition>
@@ -249,7 +249,7 @@ export default {
 @import "../style/mixins.scss";
 @import "../style/_variables.scss";
 
-.home__inner-wrapper {
+.home__container {
   color: #2c3e50;
   margin: 0 auto;
   padding: 0;
@@ -260,6 +260,10 @@ export default {
   grid: {
     template-columns: 1fr 14rem;
     template-rows: 14rem auto 14rem;
+  }
+  &.transitioning {
+    position: fixed;
+    overflow: hidden;
   }
 }
 

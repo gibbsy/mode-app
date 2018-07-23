@@ -1,19 +1,19 @@
 <template>
-    <section :id="project.slug+'-full'" class="project-page__container">
+    <section :id="project.slug+'-full'" class="project__container">
       <transition name="fade">
         <div class="project__progress-bar progress-bar" v-if="contentLoaded==false"></div>
       </transition>
     <transition name="fade" appear mode="in-out">
       <project-menu v-if="showMenu" :key="$route.params.slug" :scrollPos="scrollPos"></project-menu>
     </transition>
-      <div class="project-page__grid-wrapper" v-if="contentLoaded" :class="{menu: showMenu}">
-        <div class="project-page__back-button">
+      <div class="project__grid-wrapper" v-if="contentLoaded" :class="{menu: showMenu}">
+        <div class="project__back-button">
           <router-link to="/" class="back-arrow"></router-link>
         </div>
-       <!--  <div class="project-page__ui-left">
+       <!--  <div class="project__ui-left">
         <a class="ui-left__projects-btn" id="projects-btn" @click="toggleMenu"><span class="icon__plus"></span><h3>Projects</h3></a>   
         </div> -->
-        <div class="project-page__ui-right">
+        <div class="project__ui-right">
          <!--  <div class="ui-right__logo">
           <img src="../../assets/mode_sq_blk.svg">
           </div> -->
@@ -26,22 +26,22 @@
             <li id="behance"></li>
           </ul>
         </div>
-        <div class="project-page__hero-image" id="project-hero" :style="heroImg">
+        <div class="project__hero-image" id="project-hero" :style="heroImg">
         </div>
-        <div class="project-page__intro">
-              <ul id="tags-roles" class="project-page__intro-tags">
+        <div class="project__intro">
+              <ul id="tags-roles" class="project__intro-tags">
                 <li><h3>Role:</h3></li>
                 <li v-for="role in project.project_info.roles">{{role.role}}</li>
               </ul>
-          <ul id="tags-tech" class="project-page__intro-tags">
+          <ul id="tags-tech" class="project__intro-tags">
             <li><h3>Technology:</h3></li>
             <li v-for="technology in project.project_info.technologies">{{technology.technology}}</li>
           </ul>
-          <ul id="tags-agency" class="project-page__intro-tags">
+          <ul id="tags-agency" class="project__intro-tags">
             <li><h3>Agency:</h3></li>
             <li>{{project.project_info.agency}}</li>
           </ul>
-          <ul id="tags-year" class="project-page__intro-tags">
+          <ul id="tags-year" class="project__intro-tags">
             <li><h3>Year:</h3></li>
             <li>{{project.project_info.year}}</li>
           </ul>
@@ -49,9 +49,9 @@
             <h1 id="main-title">{{ project.title }}</h1>
             <h2 id="subtitle">{{project.project_info.subtitle}}</h2>
           </div>
-            <p id="overview-text" class="project-page__overview">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet enim sit amet dolor mollis ultrices. Quisque volutpat, lorem a malesuada imperdiet, eros urna bibendum lorem, nec tempus velit justo in enim.</p>
+            <p id="overview-text" class="project__overview">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec sit amet enim sit amet dolor mollis ultrices. Quisque volutpat, lorem a malesuada imperdiet, eros urna bibendum lorem, nec tempus velit justo in enim.</p>
         </div>
-        <div class="project-page__project-content">
+        <div class="project__project-content">
           <div class="content__block" v-for="block in project.project_media_content">
             <div class="video__container" v-for="vimeo in block.vimeo">
               <div class="video__caption">
@@ -78,7 +78,7 @@
             </div>
           </div>
         </div>
-        <div class="project-page__footer"></div>
+        <div class="project__footer"></div>
       </div>
     </section>
 </template>
@@ -126,23 +126,9 @@ export default {
     }
   },
   methods: {
-    /* transitionIn() {
-      console.log("transition");
-      const that = this;
-      const reveal1 = document.getElementById("reveal-1"),
-            reveal2 = document.getElementById("reveal-2");
-
-      const tl_transition = new TimelineMax({ onComplete: that.loadHero })
-        .set(reveal2, { x: "-=100%" })
-        .set(reveal1, { x: "-=100%" })
-        .to(reveal2, 0.5, { x: "+=100%", ease: Power1.easeIn }, 0.3)
-        .to(reveal1, 0.5, { x: "+=100%", ease: Power1.easeIn }, 0.5);
-    }, */
     revealContent(delay) {
       const wait = delay || 0.5;
-      const reveal1 = document.getElementById("reveal-1"),
-            reveal2 = document.getElementById("reveal-2"),
-            tags1 = $("#tags-roles"),
+      const tags1 = $("#tags-roles"),
             tags2 = document.getElementById("tags-tech"),
             tags3 = document.getElementById("tags-agency"),
             tags4 = document.getElementById("tags-year"),
@@ -185,8 +171,6 @@ export default {
         .set(title, { y: "+=50px" })
         .set(subtitle, { y: "+=50px" })
         .set(intro, { y: "+=50px", opacity: 0 })
-        .to(reveal1, 0.5, { x: "100%", ease: Power1.easeIn })
-        .to(reveal2, 0.5, { x: "100%", ease: Power1.easeIn }, 0.1)
         .to(tags1, 0.75, { opacity: 1, x: 0, ease: Power2.easeOut }, 0.5)
         .to(hero, 1, { width: '100%', ease: Power2.easeOut }, 0.25)
         .to(tags2, 0.75, { opacity: 1, x: 0, ease: Power2.easeOut }, 0.7)
@@ -262,7 +246,7 @@ export default {
       }
     },
     introAni() {
-      let reveal = document.querySelectorAll(".project-page__reveal");
+      let reveal = document.querySelectorAll(".project__reveal");
       let ani = new TimelineMax({ delay: 0.5 }).to(reveal, 1, {
         x: "-=100%",
         ease: Power4.easeInOut
@@ -305,11 +289,20 @@ export default {
         // then load
         const slug = this.$route.params.slug;
         const selectedIndex = this.projects.findIndex( el => el.slug == slug );
-        this.$store.dispatch('setCurrent', selectedIndex);
-        this.project = this.projects[selectedIndex];
-        this.$nextTick(function() {
-          this.extractImages();
-        });
+        console.log(selectedIndex)
+        console.log(this.projects)
+        console.log(slug)
+        if(selectedIndex !== -1) {
+          this.$store.dispatch('setCurrent', selectedIndex);
+          this.project = this.projects[selectedIndex];
+          this.$nextTick(function() {
+            this.extractImages();
+          });
+        } else {
+          //unknown route
+          console.log("unknown route")
+          this.$router.push("/");
+        }
       }
     },
     showContent: function(val) {
@@ -346,32 +339,14 @@ body.menu-open {
   }
 }
 
-.project-page__container {
+.project__container {
   position: relative;
   margin: 0;
   width: 100%;
   min-height: 100vh;
   background: none;
-  z-index: 100;
+  //z-index: 100;
   overflow-x: hidden;
-
-  .project-page__reveal {
-    position: absolute;
-    width: 100%;
-    height: 100vh;
-    top: 0;
-    left: 0;
-    background: none;
-    //background: $mode-gradient;
-    z-index: 100;
-    div {
-      position: relative;
-      width: 100%;
-      height: 50vh;
-      background-color: $mode-purple;
-      background-color:#111;
-    }
-  }
 
   .grid-background__fixed {
     position: fixed;
@@ -383,7 +358,7 @@ body.menu-open {
       border-left: 1px solid #eee;
     }
   }
-  .project-page__grid-wrapper {
+  .project__grid-wrapper {
     position: relative;
     display: grid;
     text-align: left;
@@ -399,6 +374,10 @@ body.menu-open {
     padding: 0;
     color: $mode-text;
     background: none;
+    h1,h2 {
+        font-family: "GT-Sectra";
+        color: #111;
+      }
     &.menu {
      //height: 100vh;
       overflow: hidden;
@@ -406,7 +385,7 @@ body.menu-open {
     h3 {
       font-family: "Apercu-Medium";
     }
-    .project-page__back-button {
+    .project__back-button {
       position: relative;
       grid-column: 1/span 1;
       grid-row: 1/span 1;
@@ -421,51 +400,8 @@ body.menu-open {
         background: url('../../assets/back_arrow.svg') no-repeat left top/ 100% 100%;
       }
     }
-    .project-page__ui-left {
-      position: fixed;
-      width: 10rem;
-      height: 100vh;
-      top: 0;
-      left: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-      
-      .icon__plus {
-        &:before, &:after {
-          position: absolute;
-          left: 15px;
-          content: " ";
-          height: 13px;
-          width: 2px;
-          background-color: $mode-purple;
-        }
-        &:after {
-          transform: rotate(90deg);
-        }
-      }
-      .ui-left__projects-btn {
-        position: relative;
-        display: block;
-        width: 32px;
-        height: 32px;
-        margin-top: 2rem;
-        text-decoration: none;
-        opacity: 0.5;
-        user-select: none;
-        cursor: pointer;
-        h3 {
-          @include rotate-link();
-          margin-top: 2rem;
-        }
-        &:hover {
-          opacity: 1;
-        }
-      }
-    }
-    .project-page__ui-right {
+  
+    .project__ui-right {
       position: fixed;
       width: 10rem;
       height: 94vh;
@@ -560,12 +496,12 @@ body.menu-open {
         }
       }
     }
-    .project-page__hero-image {
+    .project__hero-image {
       position: relative;
       grid-column: 1/span 8;
       grid-row: 2/intro-end;
     }
-    .project-page__intro {
+    .project__intro {
       position: relative;
       grid-column: 7/ -2;
       grid-row: intro-start/intro-end;
@@ -576,13 +512,8 @@ body.menu-open {
           overview-start] auto [overview-end];
         gap: 0;
       }
-      h1,
-      h2 {
-        font-family: "GT-Sectra";
-        color: $mode-purple;
-      }
 
-      .project-page__intro-tags {
+      .project__intro-tags {
         position: relative;
         list-style: none;
         grid-row: tags-start / tags-end;
@@ -648,7 +579,7 @@ body.menu-open {
           opacity: 0;
         }
       }
-      .project-page__overview {
+      .project__overview {
         grid-column: 4/ -2;
         grid-row: -2/-1;
         padding-top: 2rem;
@@ -658,7 +589,7 @@ body.menu-open {
         letter-spacing: 1px;
       }
     }
-    .project-page__project-content {
+    .project__project-content {
       grid-column: 1/-1;
       grid-row: project-content-start/project-content-end;
       display: grid;
@@ -730,7 +661,7 @@ body.menu-open {
         }
       }
     }
-    .project-page__footer {
+    .project__footer {
       grid-column: 1/-1;
       grid-row: footer-start/footer-end;
       background: rgba(#eee, 0.5);
